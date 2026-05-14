@@ -1,0 +1,16 @@
+{
+  "name": "Cozy Reader",
+  "short_name": "Cozy",
+  "description": "A warm, tactile PDF library for your books.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#fbf9f4",
+  "theme_color": "#fbf9f4",
+  "icons": [
+    { "src": "./icons/icon.svg", "type": "image/svg+xml", "sizes": "any", "purpose": "any" },
+    { "src": "./icons/icon-192.png", "type": "image/png", "sizes": "192x192", "purpose": "any maskable" },
+    { "src": "./icons/icon-512.png", "type": "image/png", "sizes": "512x512", "purpose": "any maskable" }
+  ]
+}

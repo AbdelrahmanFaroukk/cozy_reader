@@ -1,0 +1,188 @@
+/* Cozy Reader — custom styles layered over Tailwind CDN */
+
+:root {
+  --reader-font-size: 18px;
+  --reader-line-height: 1.7;
+  --reader-page-width: 720px;
+}
+
+html, body { background: #fbf9f4; }
+body { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+* { -webkit-tap-highlight-color: transparent; }
+
+/* Active route styling */
+.route-btn.is-active { color: #8d4b00; font-weight: 600; }
+.nav-bottom.is-active { color: #6e3900; }
+.nav-bottom.is-active span.material-symbols-outlined { font-variation-settings: "FILL" 1; }
+
+/* === Horizontal slider component === */
+.slider-host { position: relative; }
+.slider-track {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 4px 4px 12px 4px;
+  margin: 0 -4px;
+  -webkit-overflow-scrolling: touch;
+}
+.slider-track::-webkit-scrollbar { display: none; }
+.slider-track > * { scroll-snap-align: start; flex: 0 0 auto; }
+
+.slider-controls {
+  margin-top: 8px;
+  display: flex; align-items: center; gap: 10px;
+}
+.slider-arrow {
+  width: 36px; height: 36px; border-radius: 9999px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: #f0eee9; color: #554336;
+  transition: transform .15s ease, background .15s ease;
+  flex: 0 0 auto;
+}
+.slider-arrow:hover { background: #eae8e3; }
+.slider-arrow:active { transform: scale(0.92); }
+
+/* Scrub (range) — themed for warm palette */
+.slider-scrub {
+  -webkit-appearance: none; appearance: none;
+  width: 100%; height: 24px; background: transparent;
+  flex: 1 1 auto;
+}
+.slider-scrub::-webkit-slider-runnable-track {
+  height: 4px; background: linear-gradient(to right, #8d4b00 var(--p,0%), #dbc2b0 var(--p,0%));
+  border-radius: 9999px;
+}
+.slider-scrub::-moz-range-track {
+  height: 4px; background: #dbc2b0; border-radius: 9999px;
+}
+.slider-scrub::-moz-range-progress {
+  height: 4px; background: #8d4b00; border-radius: 9999px;
+}
+.slider-scrub::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 18px; height: 18px; margin-top: -7px;
+  background: #fbf9f4; border: 2px solid #8d4b00;
+  border-radius: 9999px;
+  box-shadow: 0 2px 6px rgba(141,75,0,0.35);
+  cursor: grab;
+}
+.slider-scrub::-moz-range-thumb {
+  width: 18px; height: 18px;
+  background: #fbf9f4; border: 2px solid #8d4b00; border-radius: 9999px;
+  box-shadow: 0 2px 6px rgba(141,75,0,0.35);
+  cursor: grab;
+}
+.slider-scrub:active::-webkit-slider-thumb { cursor: grabbing; transform: scale(1.05); }
+
+/* Book card (in sliders) */
+.book-card {
+  width: 150px;
+  display: flex; flex-direction: column; gap: 8px;
+  cursor: pointer;
+}
+@media (min-width: 768px) { .book-card { width: 170px; } }
+.book-card .cover {
+  position: relative; aspect-ratio: 2/3;
+  border-radius: 6px; overflow: hidden;
+  background: #e4e2dd;
+  box-shadow: 2px 4px 14px rgba(105,92,81,0.10);
+  transition: transform .25s ease, box-shadow .25s ease;
+}
+.book-card:active .cover { transform: translateY(-2px); box-shadow: 4px 8px 22px rgba(105,92,81,0.18); }
+.book-card .cover::before {
+  content: ""; position: absolute; inset: 0 auto 0 0; width: 6px;
+  background: linear-gradient(to right, rgba(255,255,255,0.45), rgba(255,255,255,0));
+  pointer-events: none;
+}
+.book-card .cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.book-card .cover .placeholder {
+  width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(160deg, #efdcce, #d5c3b6);
+  color: #51443a; font-family: "Literata", serif; font-weight: 600;
+  font-size: 14px; padding: 12px; text-align: center;
+}
+.book-card .progress-line {
+  height: 3px; border-radius: 9999px; background: #e4e2dd; overflow: hidden;
+}
+.book-card .progress-line > div { height: 100%; background: #8d4b00; }
+.book-card h4 { font-weight: 600; font-size: 14px; line-height: 1.3; color: #1b1c19;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.book-card p { font-size: 12px; color: #554336; font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+  display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+
+/* Reading-now wide card (used in horizontal slider too) */
+.book-card.wide { width: 320px; }
+.book-card.wide .row { display: flex; gap: 14px; background: #ffffff; border: 1px solid #e4e2dd;
+  border-radius: 14px; padding: 12px; box-shadow: 0 4px 14px rgba(105,92,81,0.06); }
+.book-card.wide .cover { width: 90px; aspect-ratio: 2/3; flex: 0 0 auto; }
+.book-card.wide .meta { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.book-card.wide .meta .kicker { font-family: "Plus Jakarta Sans", sans-serif; font-size: 11px; letter-spacing: 0.08em;
+  text-transform: uppercase; color: #695c51; }
+.book-card.wide .meta h4 { font-family: "Literata", serif; font-size: 17px; -webkit-line-clamp: 2; }
+.book-card.wide .meta p { margin-bottom: 8px; }
+.book-card.wide .meta .row-bottom { margin-top: auto; }
+.book-card.wide .meta .stats { display: flex; justify-content: space-between; font-size: 11px;
+  color: #554336; font-family: "Plus Jakarta Sans", sans-serif; margin-bottom: 4px; }
+
+/* === Metric cards === */
+.metric-card {
+  background: #ffffff; border: 1px solid #e4e2dd; border-radius: 14px;
+  padding: 14px; display: flex; flex-direction: column; gap: 4px;
+  box-shadow: 0 2px 8px rgba(105,92,81,0.04);
+}
+.metric-label { font-family: "Plus Jakarta Sans", sans-serif; font-size: 11px;
+  text-transform: uppercase; letter-spacing: 0.08em; color: #695c51; }
+.metric-value { font-family: "Literata", serif; font-size: 28px; font-weight: 700; color: #1b1c19; line-height: 1.1; }
+.metric-sub { font-family: "Plus Jakarta Sans", sans-serif; font-size: 11px; color: #554336; min-height: 14px; }
+
+/* Week chart bars */
+#weekChart .bar {
+  flex: 1 1 0; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%;
+}
+#weekChart .bar .col {
+  width: 100%; max-width: 28px; background: linear-gradient(180deg, #ffb77d, #8d4b00);
+  border-radius: 6px 6px 2px 2px; align-self: flex-end;
+  transition: height .4s ease;
+}
+#weekChart .bar .col.empty { background: #e4e2dd; }
+#weekChart .bar .lbl { font-size: 10px; font-family: "Plus Jakarta Sans"; color: #554336; }
+#weekChart .bar .num { font-size: 11px; font-weight: 600; color: #1b1c19; font-family: "Plus Jakarta Sans"; }
+
+/* === Reader === */
+.reader-edge {
+  position: absolute; top: 0; bottom: 0; width: 18%; max-width: 80px;
+  display: flex; align-items: center; justify-content: center;
+  color: transparent; background: transparent;
+  transition: color .2s ease, background .2s ease;
+}
+.reader-edge:hover { color: #8d4b00; background: linear-gradient(90deg, rgba(255,255,255,0.4), transparent); }
+.reader-edge.right-0:hover { background: linear-gradient(270deg, rgba(255,255,255,0.4), transparent); }
+.reader-edge:active { color: #8d4b00; }
+
+/* === Settings rows === */
+.setting-row {
+  display: grid; grid-template-columns: 120px 1fr 60px; align-items: center; gap: 14px;
+  padding: 8px 0;
+}
+@media (max-width: 640px) {
+  .setting-row { grid-template-columns: 100px 1fr 50px; }
+}
+.setting-label { font-family: "Plus Jakarta Sans", sans-serif; font-size: 13px; color: #554336; }
+.setting-val { font-family: "Plus Jakarta Sans", sans-serif; font-size: 12px; color: #1b1c19; text-align: right; }
+
+/* === Reader content (PDF canvas centering) === */
+#pdfStage { user-select: none; }
+
+/* Reader-only chrome adjustments */
+body.is-reader nav.md\:hidden { display: none; }
+body.is-reader #fab { display: none; }
+
+/* Safe area helpers */
+@supports (padding: max(0px)) {
+  body { padding-bottom: env(safe-area-inset-bottom); }
+}

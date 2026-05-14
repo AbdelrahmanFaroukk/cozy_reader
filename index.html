@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="en" class="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#fbf9f4" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Cozy Reader" />
+  <title>Cozy Reader</title>
+
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="icon" type="image/svg+xml" href="./icons/icon.svg" />
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,200..900;1,7..72,200..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+
+  <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            "tertiary": "#605b58", "on-secondary": "#ffffff", "surface": "#fbf9f4",
+            "surface-variant": "#e4e2dd", "secondary": "#695c51", "background": "#fbf9f4",
+            "on-error": "#ffffff", "error-container": "#ffdad6", "surface-bright": "#fbf9f4",
+            "primary-container": "#b15f00", "on-primary": "#ffffff",
+            "outline-variant": "#dbc2b0", "surface-container-low": "#f5f3ee",
+            "inverse-primary": "#ffb77d", "surface-dim": "#dbdad5",
+            "error": "#ba1a1a", "surface-container-lowest": "#ffffff",
+            "surface-container-high": "#eae8e3", "primary-fixed": "#ffdcc3",
+            "on-surface-variant": "#554336", "surface-container-highest": "#e4e2dd",
+            "secondary-container": "#efdcce", "primary": "#8d4b00",
+            "on-background": "#1b1c19", "inverse-on-surface": "#f2f1ec",
+            "on-primary-fixed": "#2f1500", "on-secondary-container": "#6e6055",
+            "inverse-surface": "#30312e", "secondary-fixed-dim": "#d5c3b6",
+            "secondary-fixed": "#f2dfd1", "outline": "#887364",
+            "on-surface": "#1b1c19", "on-tertiary": "#ffffff",
+            "surface-tint": "#904d00", "on-primary-container": "#fffbff",
+            "surface-container": "#f0eee9", "on-secondary-fixed": "#231a11",
+            "on-primary-fixed-variant": "#6e3900", "primary-fixed-dim": "#ffb77d",
+            "tertiary-container": "#797470", "tertiary-fixed": "#e8e1dd",
+            "on-tertiary-fixed": "#1e1b19", "on-tertiary-fixed-variant": "#4a4643",
+            "on-secondary-fixed-variant": "#51443a", "on-error-container": "#93000a",
+          },
+          fontFamily: {
+            "serif-display": ["Literata", "serif"],
+            "serif-body": ["Literata", "serif"],
+            "sans-ui": ["Plus Jakarta Sans", "system-ui", "sans-serif"],
+          },
+        },
+      },
+    };
+  </script>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body class="bg-background text-on-background min-h-[100dvh] flex flex-col antialiased font-serif-body">
+
+  <!-- Top App Bar (mobile + desktop) -->
+  <header class="sticky top-0 z-40 bg-surface/85 backdrop-blur-md flex items-center justify-between px-5 md:px-16 h-14 max-w-[1120px] mx-auto w-full">
+    <button data-route="#/library" class="route-btn font-serif-display text-xl font-bold text-primary tracking-tight">Cozy Reader</button>
+    <nav class="hidden md:flex gap-1 items-center text-sm font-sans-ui">
+      <button data-route="#/library" class="route-btn px-3 py-2 rounded-lg text-on-surface-variant">Library</button>
+      <button data-route="#/progress" class="route-btn px-3 py-2 rounded-lg text-on-surface-variant">Progress</button>
+      <button data-route="#/settings" class="route-btn px-3 py-2 rounded-lg text-on-surface-variant">Settings</button>
+    </nav>
+    <div class="flex items-center gap-1">
+      <button id="topImportBtn" class="p-2 rounded-full text-primary hover:bg-surface-container-low active:scale-95 transition" aria-label="Import a book">
+        <span class="material-symbols-outlined">upload_file</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- View Container -->
+  <main id="viewRoot" class="flex-grow w-full max-w-[1120px] mx-auto px-5 md:px-16 pt-4 pb-28 md:pb-12"></main>
+
+  <!-- Bottom Nav (mobile) -->
+  <nav class="md:hidden fixed bottom-0 left-0 w-full z-40 flex justify-around items-center px-2 py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] bg-surface/90 backdrop-blur-lg border-t border-surface-variant">
+    <button data-route="#/library" class="route-btn nav-bottom flex flex-col items-center justify-center px-4 py-1">
+      <span class="material-symbols-outlined">book_2</span>
+      <span class="text-[11px] mt-0.5 font-sans-ui">Library</span>
+    </button>
+    <button data-route="#/progress" class="route-btn nav-bottom flex flex-col items-center justify-center px-4 py-1">
+      <span class="material-symbols-outlined">analytics</span>
+      <span class="text-[11px] mt-0.5 font-sans-ui">Progress</span>
+    </button>
+    <button data-route="#/settings" class="route-btn nav-bottom flex flex-col items-center justify-center px-4 py-1">
+      <span class="material-symbols-outlined">settings</span>
+      <span class="text-[11px] mt-0.5 font-sans-ui">Settings</span>
+    </button>
+  </nav>
+
+  <!-- Floating Add Button -->
+  <button id="fab" aria-label="Import a book"
+          class="fixed right-5 bottom-[calc(72px+env(safe-area-inset-bottom))] md:bottom-8 md:right-8 z-40 bg-primary text-on-primary w-14 h-14 rounded-full flex items-center justify-center shadow-[0_8px_24px_rgba(141,75,0,0.35)] active:scale-95 transition">
+    <span class="material-symbols-outlined text-3xl">add</span>
+  </button>
+
+  <!-- File input (hidden) -->
+  <input id="pdfInput" type="file" accept="application/pdf,.pdf" multiple class="hidden" />
+
+  <!-- Import progress toast -->
+  <div id="toast" class="fixed bottom-24 md:bottom-8 left-1/2 -translate-x-1/2 z-50 hidden bg-inverse-surface text-inverse-on-surface px-4 py-2 rounded-full text-sm font-sans-ui shadow-lg"></div>
+
+  <!-- Templates -->
+  <template id="tpl-library">
+    <section class="space-y-10">
+      <div class="space-y-2 pt-2">
+        <h1 class="font-serif-display text-3xl md:text-4xl text-on-surface" data-greet>Welcome back</h1>
+        <p class="text-on-surface-variant" data-subgreet>Your library is waiting.</p>
+      </div>
+
+      <!-- Empty state -->
+      <div data-empty class="hidden border-2 border-dashed border-outline-variant rounded-xl py-14 px-6 text-center bg-surface-container-lowest">
+        <div class="w-16 h-16 rounded-full bg-primary-container mx-auto flex items-center justify-center text-on-primary-container mb-4">
+          <span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">menu_book</span>
+        </div>
+        <h2 class="font-serif-display text-2xl mb-2">Your shelf is empty</h2>
+        <p class="text-on-surface-variant mb-6 max-w-md mx-auto">Import a PDF and we'll use its first page as the book's cover automatically.</p>
+        <button data-act="empty-import" class="bg-primary text-on-primary px-6 py-3 rounded-full text-sm font-sans-ui font-medium active:scale-95 transition">Import a PDF</button>
+      </div>
+
+      <!-- Reading Now -->
+      <section data-section="reading-now" class="space-y-4 hidden">
+        <div class="flex justify-between items-end border-b border-outline-variant pb-2">
+          <h2 class="text-lg font-bold text-on-surface">Reading Now</h2>
+          <span class="text-xs text-on-surface-variant font-sans-ui" data-count></span>
+        </div>
+        <div class="slider-host" data-slider-host>
+          <div class="slider-track" data-slider-track></div>
+          <div class="slider-controls">
+            <button class="slider-arrow" data-dir="-1" aria-label="scroll left"><span class="material-symbols-outlined">chevron_left</span></button>
+            <input type="range" class="slider-scrub" min="0" max="100" value="0" aria-label="Scrub through books" />
+            <button class="slider-arrow" data-dir="1" aria-label="scroll right"><span class="material-symbols-outlined">chevron_right</span></button>
+          </div>
+        </div>
+      </section>
+
+      <!-- All Books -->
+      <section data-section="all-books" class="space-y-4 hidden">
+        <div class="flex justify-between items-end border-b border-outline-variant pb-2">
+          <h2 class="text-lg font-bold text-on-surface">All Books</h2>
+          <span class="text-xs text-on-surface-variant font-sans-ui" data-count></span>
+        </div>
+        <div class="slider-host" data-slider-host>
+          <div class="slider-track" data-slider-track></div>
+          <div class="slider-controls">
+            <button class="slider-arrow" data-dir="-1" aria-label="scroll left"><span class="material-symbols-outlined">chevron_left</span></button>
+            <input type="range" class="slider-scrub" min="0" max="100" value="0" aria-label="Scrub through books" />
+            <button class="slider-arrow" data-dir="1" aria-label="scroll right"><span class="material-symbols-outlined">chevron_right</span></button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Finished -->
+      <section data-section="finished" class="space-y-4 hidden">
+        <div class="flex justify-between items-end border-b border-outline-variant pb-2">
+          <h2 class="text-lg font-bold text-on-surface">Finished</h2>
+          <span class="text-xs text-on-surface-variant font-sans-ui" data-count></span>
+        </div>
+        <div class="slider-host" data-slider-host>
+          <div class="slider-track" data-slider-track></div>
+          <div class="slider-controls">
+            <button class="slider-arrow" data-dir="-1" aria-label="scroll left"><span class="material-symbols-outlined">chevron_left</span></button>
+            <input type="range" class="slider-scrub" min="0" max="100" value="0" aria-label="Scrub through books" />
+            <button class="slider-arrow" data-dir="1" aria-label="scroll right"><span class="material-symbols-outlined">chevron_right</span></button>
+          </div>
+        </div>
+      </section>
+    </section>
+  </template>
+
+  <template id="tpl-progress">
+    <section class="space-y-10">
+      <div class="space-y-2 pt-2">
+        <h1 class="font-serif-display text-3xl md:text-4xl text-on-surface">Your reading</h1>
+        <p class="text-on-surface-variant">Every metric here comes from your actual reading sessions.</p>
+      </div>
+
+      <!-- Top metrics -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+        <div class="metric-card"><span class="metric-label">Books</span><span class="metric-value" data-metric="books">0</span><span class="metric-sub" data-metric-sub="books"></span></div>
+        <div class="metric-card"><span class="metric-label">In progress</span><span class="metric-value" data-metric="inprogress">0</span><span class="metric-sub" data-metric-sub="inprogress"></span></div>
+        <div class="metric-card"><span class="metric-label">Pages today</span><span class="metric-value" data-metric="pagesToday">0</span><span class="metric-sub" data-metric-sub="pagesToday"></span></div>
+        <div class="metric-card"><span class="metric-label">Streak</span><span class="metric-value" data-metric="streak">0</span><span class="metric-sub" data-metric-sub="streak">days</span></div>
+        <div class="metric-card"><span class="metric-label">Pages this week</span><span class="metric-value" data-metric="pagesWeek">0</span><span class="metric-sub" data-metric-sub="pagesWeek"></span></div>
+        <div class="metric-card"><span class="metric-label">Time today</span><span class="metric-value" data-metric="timeToday">0m</span><span class="metric-sub" data-metric-sub="timeToday"></span></div>
+        <div class="metric-card"><span class="metric-label">Time this week</span><span class="metric-value" data-metric="timeWeek">0m</span><span class="metric-sub" data-metric-sub="timeWeek"></span></div>
+        <div class="metric-card"><span class="metric-label">Pages total</span><span class="metric-value" data-metric="pagesTotal">0</span><span class="metric-sub" data-metric-sub="pagesTotal"></span></div>
+      </div>
+
+      <!-- Weekly chart -->
+      <section class="space-y-3">
+        <div class="flex justify-between items-end border-b border-outline-variant pb-2">
+          <h2 class="text-lg font-bold text-on-surface">Last 7 days</h2>
+          <span class="text-xs text-on-surface-variant font-sans-ui" data-week-total></span>
+        </div>
+        <div id="weekChart" class="flex items-end gap-2 h-40 px-1"></div>
+      </section>
+
+      <!-- Per-book progress with slider -->
+      <section class="space-y-3">
+        <div class="flex justify-between items-end border-b border-outline-variant pb-2">
+          <h2 class="text-lg font-bold text-on-surface">Books in progress</h2>
+          <span class="text-xs text-on-surface-variant font-sans-ui" data-progress-count></span>
+        </div>
+        <div class="slider-host" data-slider-host id="progressSliderHost">
+          <div class="slider-track" data-slider-track id="progressSliderTrack"></div>
+          <div class="slider-controls">
+            <button class="slider-arrow" data-dir="-1" aria-label="scroll left"><span class="material-symbols-outlined">chevron_left</span></button>
+            <input type="range" class="slider-scrub" min="0" max="100" value="0" aria-label="Scrub through books" />
+            <button class="slider-arrow" data-dir="1" aria-label="scroll right"><span class="material-symbols-outlined">chevron_right</span></button>
+          </div>
+        </div>
+      </section>
+    </section>
+  </template>
+
+  <template id="tpl-settings">
+    <section class="space-y-10">
+      <div class="space-y-2 pt-2">
+        <h1 class="font-serif-display text-3xl md:text-4xl text-on-surface">Settings</h1>
+        <p class="text-on-surface-variant">Reading preferences live on your device.</p>
+      </div>
+
+      <div class="space-y-4">
+        <h2 class="text-lg font-bold border-b border-outline-variant pb-2">Reader</h2>
+        <div class="setting-row">
+          <label class="setting-label">Page width</label>
+          <input id="prefPageWidth" type="range" min="380" max="1100" step="20" class="slider-scrub w-full max-w-xs" />
+          <span data-val="prefPageWidth" class="setting-val">720px</span>
+        </div>
+        <p class="text-xs text-on-surface-variant">Wider page = larger zoom. The slider above each book list lets you scrub through it instantly.</p>
+      </div>
+
+      <div class="space-y-4">
+        <h2 class="text-lg font-bold border-b border-outline-variant pb-2">Install</h2>
+        <p class="text-on-surface-variant text-sm">On your iPhone, open this page in Safari, tap the Share button, then "Add to Home Screen" to install Cozy Reader as a full-screen app.</p>
+      </div>
+
+      <div class="space-y-4">
+        <h2 class="text-lg font-bold border-b border-outline-variant pb-2">Data</h2>
+        <div class="flex flex-wrap gap-3">
+          <button id="resetSessions" class="px-4 py-2 rounded-full border border-outline-variant text-sm font-sans-ui">Reset reading metrics</button>
+          <button id="wipeAll" class="px-4 py-2 rounded-full bg-error text-on-error text-sm font-sans-ui">Delete all books & data</button>
+        </div>
+        <p class="text-xs text-on-surface-variant" id="storageInfo"></p>
+      </div>
+    </section>
+  </template>
+
+  <template id="tpl-reader">
+    <section class="space-y-4">
+      <header class="flex items-center justify-between gap-2">
+        <button data-route="#/library" class="route-btn p-2 rounded-full hover:bg-surface-container-low" aria-label="Back to library">
+          <span class="material-symbols-outlined">arrow_back</span>
+        </button>
+        <div class="flex-1 min-w-0 text-center">
+          <div class="text-xs uppercase tracking-widest text-on-surface-variant font-sans-ui truncate" data-reader-title>—</div>
+          <div class="text-xs text-on-surface-variant font-sans-ui" data-reader-meta>—</div>
+        </div>
+        <button data-act="bookmark" class="p-2 rounded-full hover:bg-surface-container-low" aria-label="Bookmark">
+          <span class="material-symbols-outlined" data-bookmark-icon>bookmark_border</span>
+        </button>
+      </header>
+
+      <div id="pdfStage" class="relative w-full flex justify-center items-start min-h-[60dvh]">
+        <canvas id="pdfCanvas" class="max-w-full h-auto rounded shadow-[2px_4px_18px_rgba(105,92,81,0.18)] bg-surface-container-lowest"></canvas>
+        <button data-act="prev" class="reader-edge left-0" aria-label="Previous page">
+          <span class="material-symbols-outlined">chevron_left</span>
+        </button>
+        <button data-act="next" class="reader-edge right-0" aria-label="Next page">
+          <span class="material-symbols-outlined">chevron_right</span>
+        </button>
+      </div>
+
+      <!-- Page slider — jump to any page -->
+      <div class="sticky bottom-2 z-30 mx-auto max-w-[720px] w-full px-2">
+        <div class="flex items-center gap-3 bg-surface-container-high/95 backdrop-blur-md border border-surface-variant rounded-full px-3 py-2 shadow-[0_8px_24px_rgba(105,92,81,0.12)]">
+          <span class="text-xs font-sans-ui text-on-surface-variant min-w-[3rem] text-center" data-page-cur>1</span>
+          <input id="pageSlider" type="range" min="1" max="1" value="1" class="slider-scrub flex-1" aria-label="Jump to page" />
+          <span class="text-xs font-sans-ui text-on-surface-variant min-w-[3rem] text-center" data-page-tot>1</span>
+        </div>
+      </div>
+    </section>
+  </template>
+
+  <script type="module">
+    import * as pdfjsLib from "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.5.136/build/pdf.min.mjs";
+    pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.5.136/build/pdf.worker.min.mjs";
+    window.pdfjsLib = pdfjsLib;
+    window.dispatchEvent(new Event("pdfjs-ready"));
+  </script>
+  <script src="./app.js" defer></script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js").catch(() => {}));
+    }
+  </script>
+</body>
+</html>

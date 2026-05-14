@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Import Your Books - Cozy Reader</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,200..900;1,7..72,200..900&amp;family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary": "#605b58",
+                    "on-secondary": "#ffffff",
+                    "surface": "#fbf9f4",
+                    "surface-variant": "#e4e2dd",
+                    "secondary": "#695c51",
+                    "tertiary-fixed-dim": "#ccc5c1",
+                    "tertiary-fixed": "#e8e1dd",
+                    "on-error-container": "#93000a",
+                    "primary-fixed-dim": "#ffb77d",
+                    "background": "#fbf9f4",
+                    "tertiary-container": "#797470",
+                    "on-secondary-fixed-variant": "#51443a",
+                    "on-error": "#ffffff",
+                    "error-container": "#ffdad6",
+                    "on-tertiary-fixed": "#1e1b19",
+                    "surface-bright": "#fbf9f4",
+                    "primary-container": "#b15f00",
+                    "on-tertiary-container": "#fffbff",
+                    "on-primary": "#ffffff",
+                    "on-primary-fixed-variant": "#6e3900",
+                    "outline-variant": "#dbc2b0",
+                    "surface-container-low": "#f5f3ee",
+                    "inverse-primary": "#ffb77d",
+                    "surface-dim": "#dbdad5",
+                    "on-tertiary-fixed-variant": "#4a4643",
+                    "error": "#ba1a1a",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-container-high": "#eae8e3",
+                    "primary-fixed": "#ffdcc3",
+                    "on-surface-variant": "#554336",
+                    "surface-container-highest": "#e4e2dd",
+                    "secondary-container": "#efdcce",
+                    "primary": "#8d4b00",
+                    "on-background": "#1b1c19",
+                    "inverse-on-surface": "#f2f1ec",
+                    "on-primary-fixed": "#2f1500",
+                    "on-secondary-container": "#6e6055",
+                    "inverse-surface": "#30312e",
+                    "secondary-fixed-dim": "#d5c3b6",
+                    "secondary-fixed": "#f2dfd1",
+                    "outline": "#887364",
+                    "on-surface": "#1b1c19",
+                    "on-tertiary": "#ffffff",
+                    "surface-tint": "#904d00",
+                    "on-primary-container": "#fffbff",
+                    "surface-container": "#f0eee9",
+                    "on-secondary-fixed": "#231a11"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "container-max": "1120px",
+                    "unit": "8px",
+                    "margin-mobile": "20px",
+                    "gutter": "24px",
+                    "margin-desktop": "64px"
+            },
+            "fontFamily": {
+                    "headline-lg-mobile": [
+                            "Literata"
+                    ],
+                    "body-lg": [
+                            "Literata"
+                    ],
+                    "label-sm": [
+                            "Plus Jakarta Sans"
+                    ],
+                    "display-lg": [
+                            "Literata"
+                    ],
+                    "body-md": [
+                            "Literata"
+                    ],
+                    "label-md": [
+                            "Plus Jakarta Sans"
+                    ],
+                    "headline-lg": [
+                            "Literata"
+                    ]
+            },
+            "fontSize": {
+                    "headline-lg-mobile": [
+                            "28px",
+                            {
+                                    "lineHeight": "36px",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "body-lg": [
+                            "18px",
+                            {
+                                    "lineHeight": "32px",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "label-sm": [
+                            "12px",
+                            {
+                                    "lineHeight": "16px",
+                                    "letterSpacing": "0.05em",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "display-lg": [
+                            "48px",
+                            {
+                                    "lineHeight": "56px",
+                                    "letterSpacing": "-0.02em",
+                                    "fontWeight": "700"
+                            }
+                    ],
+                    "body-md": [
+                            "16px",
+                            {
+                                    "lineHeight": "28px",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "label-md": [
+                            "14px",
+                            {
+                                    "lineHeight": "20px",
+                                    "letterSpacing": "0.01em",
+                                    "fontWeight": "500"
+                            }
+                    ],
+                    "headline-lg": [
+                            "32px",
+                            {
+                                    "lineHeight": "40px",
+                                    "fontWeight": "600"
+                            }
+                    ]
+            }
+          }
+        }
+      }
+    </script>
+<style type="text/tailwindcss">
+        @layer utilities {
+            .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen flex flex-col antialiased">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 bg-surface/80 dark:bg-surface/80 backdrop-blur-md h-14 flex justify-between items-center px-margin-mobile max-w-max-width-content mx-auto">
+<div class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed-dim">
+            Cozy Reader
+        </div>
+<div class="flex items-center space-x-4">
+<button class="text-on-surface-variant hover:bg-surface-container-low transition-colors cursor-pointer active:scale-95 duration-250 ease-in-out p-2 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">notifications</span>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow pt-[calc(14px+80px)] pb-[calc(80px+env(safe-area-inset-bottom))] px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto w-full flex flex-col gap-12">
+<!-- Page Header -->
+<section class="flex flex-col gap-2">
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-on-background">Import Your Books</h1>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-[720px]">Add new stories to your shelf. We support EPUB, PDF, and MOBI formats.</p>
+</section>
+<!-- Main Layout: Bento Grid style for larger screens, stack for mobile -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-gutter">
+<!-- Upload Area (Main Action) -->
+<div class="md:col-span-8 flex flex-col gap-4">
+<div class="bg-surface-container-lowest border-2 border-dashed border-outline-variant rounded-xl p-8 md:p-12 flex flex-col items-center justify-center text-center gap-6 min-h-[300px] hover:bg-surface-container-low transition-colors cursor-pointer shadow-[inset_0_2px_12px_rgba(0,0,0,0.02)]">
+<div class="w-16 h-16 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container shadow-sm">
+<span class="material-symbols-outlined text-4xl" style="font-variation-settings: 'FILL' 1;">upload_file</span>
+</div>
+<div class="flex flex-col gap-1">
+<h3 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface">Select or Drag Files</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Tap here to choose files from your device</p>
+</div>
+<button class="bg-primary text-on-primary font-label-md text-label-md px-6 py-3 rounded-full hover:bg-surface-tint active:scale-95 transition-all shadow-sm">
+                        Browse Device
+                    </button>
+</div>
+</div>
+<!-- Side Panel: Tips & Status -->
+<div class="md:col-span-4 flex flex-col gap-6">
+<!-- Librarian's Tip Card -->
+<div class="bg-secondary-container rounded-xl p-6 relative overflow-hidden shadow-[0_4px_12px_rgba(105,92,81,0.08)]">
+<!-- Subtle decorative accent -->
+<div class="absolute top-0 right-0 w-24 h-24 bg-surface-bright/20 rounded-bl-full -mr-4 -mt-4"></div>
+<div class="flex items-center gap-3 mb-4 relative z-10">
+<span class="material-symbols-outlined text-on-secondary-container" style="font-variation-settings: 'FILL' 1;">lightbulb</span>
+<h3 class="font-label-md text-label-md text-on-secondary-container">Librarian's Tip</h3>
+</div>
+<p class="font-body-md text-body-md text-on-secondary-container relative z-10">
+                        For the best reading experience, we recommend importing EPUB files. They adapt beautifully to your preferred text size and font settings, unlike rigid PDFs.
+                    </p>
+</div>
+<!-- Recent Imports List -->
+<div class="flex flex-col gap-4">
+<h3 class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Recent Imports</h3>
+<div class="flex flex-col gap-3">
+<!-- Import Item 1 (Success) -->
+<div class="flex items-center gap-4 bg-surface-container-low p-3 rounded-lg border border-surface-variant">
+<div class="w-10 h-10 rounded bg-tertiary-fixed flex items-center justify-center text-on-tertiary-fixed">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">book_4</span>
+</div>
+<div class="flex-grow flex flex-col">
+<span class="font-label-md text-label-md text-on-surface line-clamp-1">The Shadow of the Wind.epub</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">2 mins ago • 1.2 MB</span>
+</div>
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<!-- Import Item 2 (Processing) -->
+<div class="flex items-center gap-4 bg-surface-container-low p-3 rounded-lg border border-surface-variant">
+<div class="w-10 h-10 rounded bg-tertiary-fixed flex items-center justify-center text-on-tertiary-fixed">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">picture_as_pdf</span>
+</div>
+<div class="flex-grow flex flex-col">
+<span class="font-label-md text-label-md text-on-surface line-clamp-1">Dune_Chronicles.pdf</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Processing...</span>
+</div>
+<span class="material-symbols-outlined text-tertiary-container animate-pulse" style="font-variation-settings: 'FILL' 1;">sync</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-2 pb-safe bg-surface/90 dark:bg-surface-container-high/90 backdrop-blur-lg rounded-t-xl shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
+<button class="flex flex-col items-center justify-center text-on-secondary-container dark:text-on-secondary-fixed-variant px-4 py-1 hover:bg-secondary-container/50 dark:hover:bg-secondary-container/20 active:scale-90 transition-transform duration-250">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">home</span>
+<span class="font-label-md text-label-md mt-1">Home</span>
+</button>
+<button class="flex flex-col items-center justify-center flex flex-col items-center justify-center bg-primary-container dark:bg-primary text-on-primary-container dark:text-on-primary rounded-xl px-4 py-1 hover:bg-secondary-container/50 dark:hover:bg-secondary-container/20 active:scale-90 transition-transform duration-250">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">book_2</span>
+<span class="font-label-md text-label-md mt-1">Library</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-secondary-container dark:text-on-secondary-fixed-variant px-4 py-1 hover:bg-secondary-container/50 dark:hover:bg-secondary-container/20 active:scale-90 transition-transform duration-250">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">analytics</span>
+<span class="font-label-md text-label-md mt-1">Progress</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-secondary-container dark:text-on-secondary-fixed-variant px-4 py-1 hover:bg-secondary-container/50 dark:hover:bg-secondary-container/20 active:scale-90 transition-transform duration-250">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">settings</span>
+<span class="font-label-md text-label-md mt-1">Settings</span>
+</button>
+</nav>
+</body></html>

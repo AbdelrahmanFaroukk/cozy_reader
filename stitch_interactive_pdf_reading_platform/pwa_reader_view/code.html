@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Reader View - Cozy Reader</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts for Literata & Plus Jakarta Sans -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,200..900;1,7..72,200..900&amp;family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Theme Configuration -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary": "#605b58",
+                    "on-secondary": "#ffffff",
+                    "surface": "#fbf9f4",
+                    "surface-variant": "#e4e2dd",
+                    "secondary": "#695c51",
+                    "tertiary-fixed-dim": "#ccc5c1",
+                    "tertiary-fixed": "#e8e1dd",
+                    "on-error-container": "#93000a",
+                    "primary-fixed-dim": "#ffb77d",
+                    "background": "#fbf9f4",
+                    "tertiary-container": "#797470",
+                    "on-secondary-fixed-variant": "#51443a",
+                    "on-error": "#ffffff",
+                    "error-container": "#ffdad6",
+                    "on-tertiary-fixed": "#1e1b19",
+                    "surface-bright": "#fbf9f4",
+                    "primary-container": "#b15f00",
+                    "on-tertiary-container": "#fffbff",
+                    "on-primary": "#ffffff",
+                    "on-primary-fixed-variant": "#6e3900",
+                    "outline-variant": "#dbc2b0",
+                    "surface-container-low": "#f5f3ee",
+                    "inverse-primary": "#ffb77d",
+                    "surface-dim": "#dbdad5",
+                    "on-tertiary-fixed-variant": "#4a4643",
+                    "error": "#ba1a1a",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-container-high": "#eae8e3",
+                    "primary-fixed": "#ffdcc3",
+                    "on-surface-variant": "#554336",
+                    "surface-container-highest": "#e4e2dd",
+                    "secondary-container": "#efdcce",
+                    "primary": "#8d4b00",
+                    "on-background": "#1b1c19",
+                    "inverse-on-surface": "#f2f1ec",
+                    "on-primary-fixed": "#2f1500",
+                    "on-secondary-container": "#6e6055",
+                    "inverse-surface": "#30312e",
+                    "secondary-fixed-dim": "#d5c3b6",
+                    "secondary-fixed": "#f2dfd1",
+                    "outline": "#887364",
+                    "on-surface": "#1b1c19",
+                    "on-tertiary": "#ffffff",
+                    "surface-tint": "#904d00",
+                    "on-primary-container": "#fffbff",
+                    "surface-container": "#f0eee9",
+                    "on-secondary-fixed": "#231a11"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "container-max": "1120px",
+                    "unit": "8px",
+                    "margin-mobile": "20px",
+                    "gutter": "24px",
+                    "margin-desktop": "64px"
+            },
+            "fontFamily": {
+                    "headline-lg-mobile": [
+                            "Literata"
+                    ],
+                    "body-lg": [
+                            "Literata"
+                    ],
+                    "label-sm": [
+                            "Plus Jakarta Sans"
+                    ],
+                    "display-lg": [
+                            "Literata"
+                    ],
+                    "body-md": [
+                            "Literata"
+                    ],
+                    "label-md": [
+                            "Plus Jakarta Sans"
+                    ],
+                    "headline-lg": [
+                            "Literata"
+                    ]
+            },
+            "fontSize": {
+                    "headline-lg-mobile": [
+                            "28px",
+                            {
+                                    "lineHeight": "36px",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "body-lg": [
+                            "18px",
+                            {
+                                    "lineHeight": "32px",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "label-sm": [
+                            "12px",
+                            {
+                                    "lineHeight": "16px",
+                                    "letterSpacing": "0.05em",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "display-lg": [
+                            "48px",
+                            {
+                                    "lineHeight": "56px",
+                                    "letterSpacing": "-0.02em",
+                                    "fontWeight": "700"
+                            }
+                    ],
+                    "body-md": [
+                            "16px",
+                            {
+                                    "lineHeight": "28px",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "label-md": [
+                            "14px",
+                            {
+                                    "lineHeight": "20px",
+                                    "letterSpacing": "0.01em",
+                                    "fontWeight": "500"
+                            }
+                    ],
+                    "headline-lg": [
+                            "32px",
+                            {
+                                    "lineHeight": "40px",
+                                    "fontWeight": "600"
+                            }
+                    ]
+            }
+    },
+        },
+      }
+    </script>
+<style>
+        /* Smooth scrolling for reading view */
+        html { scroll-behavior: smooth; }
+        
+        /* Custom text selection color to match brand */
+        ::selection {
+            background-color: #ffdcc3; /* primary-fixed */
+            color: #2f1500; /* on-primary-fixed */
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<!-- Suppressing Navigation Shells (TopAppBar/BottomNavBar) due to Task-Focused Intent (Reader View) -->
+<body class="min-h-screen bg-surface text-on-surface antialiased flex flex-col relative selection:bg-primary-fixed selection:text-on-primary-fixed">
+<!-- Immersive Reading Header -->
+<header class="fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 py-4 md:px-margin-desktop md:py-6 bg-surface/90 backdrop-blur-md transition-opacity duration-300">
+<!-- Back Action -->
+<button aria-label="Back to Library" class="p-2 rounded-full hover:bg-surface-container-low text-on-surface-variant transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0, 'wght' 300;">arrow_back</span>
+</button>
+<!-- Subtle Context Indicator -->
+<div class="text-center absolute left-1/2 -translate-x-1/2 opacity-0 md:opacity-100 transition-opacity duration-300">
+<span class="font-label-sm text-label-sm text-on-surface-variant tracking-[0.1em] uppercase">The Architecture of Silence</span>
+</div>
+<!-- Utility Action -->
+<button aria-label="Bookmark this page" class="p-2 rounded-full hover:bg-surface-container-low text-on-surface-variant transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0, 'wght' 300;">bookmark_border</span>
+</button>
+</header>
+<!-- Main Reading Canvas (Grid-constrained width for optimal line length) -->
+<main class="flex-grow pt-28 pb-40 px-6 md:px-0 w-full max-w-[720px] mx-auto flex flex-col gap-12 relative z-10">
+<!-- Chapter Header -->
+<header class="text-center mb-6">
+<span class="block font-label-md text-label-md text-secondary tracking-[0.15em] uppercase mb-4">Chapter IV</span>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile md:font-display-lg md:text-display-lg text-on-surface text-balance">The Weight of Void</h1>
+</header>
+<!-- Book Content (Tactile Typography) -->
+<article class="font-body-lg text-body-lg text-on-surface flex flex-col gap-8 leading-[1.8] text-justify md:text-left">
+<p class="first-letter:float-left first-letter:text-[4rem] first-letter:leading-[0.8] first-letter:pr-3 first-letter:font-headline-lg-mobile first-letter:text-primary">
+                In the vast, echoing chambers of the old cathedral, silence wasn't merely the absence of sound; it was a structural entity. It held up the vaulted ceilings as surely as the immense stone pillars did. To speak here was to commit a kind of architectural vandalism, chipping away at the invisible, meticulously laid masonry that gave the space its solemn weight. The air itself felt thick, layered with centuries of unspoken prayers and withheld breaths, settling over the skin like a heavy, unseen quilt.
+            </p>
+<p>
+                Elias traced the worn edge of a darkened oak pew, feeling the centuries of polished history under his fingertips. The wood was smooth, its grain softened by generations of hesitant hands. Dust motes danced lazily in the single shaft of deep amber light that pierced the gloom from the high rose window above. This was where he came to listen to nothing, to surrender his own noise to the overwhelming pressure of the quietness.
+            </p>
+<!-- Embedded quote/callout styling for variety -->
+<blockquote class="pl-6 border-l-2 border-primary-fixed-dim italic text-on-surface-variant my-4 font-body-md text-body-md">
+                "We build walls not just to keep the weather out, but to cup our hands around a pocket of stillness, protecting it from the storm of the world."
+            </blockquote>
+<p>
+                The fragmented blueprints he had discovered in the subterranean archives suggested a hidden chamber beneath the altar—a resonance room designed not to echo chants, but to amplify the ambient vibrations of the earth itself. The original builders, it seemed, understood a fundamental truth that modern architects had long forgotten: true silence was a frequency of its own. A low, persistent hum that vibrated at the exact, melancholic pitch of the human soul. He wondered if finding the center of that room would mean finding peace, or simply losing the edges of himself entirely.
+            </p>
+<p>
+                He closed his eyes, leaning back against the cool stone. Outside, the city roared its mechanical symphony, but here, protected by layers of ancient intention, he was safe within the void.
+            </p>
+</article>
+<!-- Subtle progress indicator at bottom of chapter -->
+<div class="mt-12 flex items-center justify-center gap-4">
+<div class="w-12 h-px bg-surface-variant"></div>
+<span class="font-label-sm text-label-sm text-on-surface-variant opacity-50">✦</span>
+<div class="w-12 h-px bg-surface-variant"></div>
+</div>
+</main>
+<!-- Custom Floating Toolbar (Tactile Control Pill) -->
+<nav class="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center px-2 py-2 bg-surface-container-high/90 backdrop-blur-lg rounded-full shadow-[0_8px_32px_rgba(105,92,81,0.08)] border border-surface-variant/40 transition-transform duration-300">
+<!-- Font Size Toggle -->
+<button aria-label="Adjust Text Display" class="px-5 py-3 rounded-full text-on-surface-variant hover:text-primary hover:bg-surface-container-highest transition-all flex items-center justify-center group">
+<span class="material-symbols-outlined group-active:scale-95 transition-transform" style="font-variation-settings: 'FILL' 0, 'wght' 300;">text_fields</span>
+</button>
+<!-- Divider -->
+<div class="w-px h-6 bg-outline-variant/50 mx-1"></div>
+<!-- Brightness/Theme Toggle -->
+<button aria-label="Adjust Brightness" class="px-5 py-3 rounded-full text-on-surface-variant hover:text-primary hover:bg-surface-container-highest transition-all flex items-center justify-center group">
+<span class="material-symbols-outlined group-active:scale-95 transition-transform" style="font-variation-settings: 'FILL' 0, 'wght' 300;">light_mode</span>
+</button>
+<!-- Divider -->
+<div class="w-px h-6 bg-outline-variant/50 mx-1"></div>
+<!-- Notebook/Annotations -->
+<button aria-label="Open Notebook" class="px-5 py-3 rounded-full text-on-surface-variant hover:text-primary hover:bg-surface-container-highest transition-all flex items-center justify-center group relative">
+<span class="material-symbols-outlined group-active:scale-95 transition-transform" style="font-variation-settings: 'FILL' 0, 'wght' 300;">edit_note</span>
+<!-- Subtle notification dot for existing notes -->
+<span class="absolute top-3 right-4 w-1.5 h-1.5 rounded-full bg-primary opacity-80"></span>
+</button>
+</nav>
+<!-- Ambient Shadow Overlay (for vignette effect on edges) -->
+<div class="pointer-events-none fixed inset-0 z-0 shadow-[inset_0_0_120px_rgba(105,92,81,0.03)]"></div>
+</body></html>

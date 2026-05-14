@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+<title>Cozy Reader - Library</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,200..900;1,7..72,200..900&amp;family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary": "#605b58",
+                    "on-secondary": "#ffffff",
+                    "surface": "#fbf9f4",
+                    "surface-variant": "#e4e2dd",
+                    "secondary": "#695c51",
+                    "tertiary-fixed-dim": "#ccc5c1",
+                    "tertiary-fixed": "#e8e1dd",
+                    "on-error-container": "#93000a",
+                    "primary-fixed-dim": "#ffb77d",
+                    "background": "#fbf9f4",
+                    "tertiary-container": "#797470",
+                    "on-secondary-fixed-variant": "#51443a",
+                    "on-error": "#ffffff",
+                    "error-container": "#ffdad6",
+                    "on-tertiary-fixed": "#1e1b19",
+                    "surface-bright": "#fbf9f4",
+                    "primary-container": "#b15f00",
+                    "on-tertiary-container": "#fffbff",
+                    "on-primary": "#ffffff",
+                    "on-primary-fixed-variant": "#6e3900",
+                    "outline-variant": "#dbc2b0",
+                    "surface-container-low": "#f5f3ee",
+                    "inverse-primary": "#ffb77d",
+                    "surface-dim": "#dbdad5",
+                    "on-tertiary-fixed-variant": "#4a4643",
+                    "error": "#ba1a1a",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-container-high": "#eae8e3",
+                    "primary-fixed": "#ffdcc3",
+                    "on-surface-variant": "#554336",
+                    "surface-container-highest": "#e4e2dd",
+                    "secondary-container": "#efdcce",
+                    "primary": "#8d4b00",
+                    "on-background": "#1b1c19",
+                    "inverse-on-surface": "#f2f1ec",
+                    "on-primary-fixed": "#2f1500",
+                    "on-secondary-container": "#6e6055",
+                    "inverse-surface": "#30312e",
+                    "secondary-fixed-dim": "#d5c3b6",
+                    "secondary-fixed": "#f2dfd1",
+                    "outline": "#887364",
+                    "on-surface": "#1b1c19",
+                    "on-tertiary": "#ffffff",
+                    "surface-tint": "#904d00",
+                    "on-primary-container": "#fffbff",
+                    "surface-container": "#f0eee9",
+                    "on-secondary-fixed": "#231a11"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "container-max": "1120px",
+                    "unit": "8px",
+                    "margin-mobile": "20px",
+                    "gutter": "24px",
+                    "margin-desktop": "64px"
+            },
+            "fontFamily": {
+                    "headline-lg-mobile": [
+                            "Literata"
+                    ],
+                    "body-lg": [
+                            "Literata"
+                    ],
+                    "label-sm": [
+                            "Plus Jakarta Sans"
+                    ],
+                    "display-lg": [
+                            "Literata"
+                    ],
+                    "body-md": [
+                            "Literata"
+                    ],
+                    "label-md": [
+                            "Plus Jakarta Sans"
+                    ],
+                    "headline-lg": [
+                            "Literata"
+                    ]
+            },
+            "fontSize": {
+                    "headline-lg-mobile": [
+                            "28px",
+                            {
+                                    "lineHeight": "36px",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "body-lg": [
+                            "18px",
+                            {
+                                    "lineHeight": "32px",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "label-sm": [
+                            "12px",
+                            {
+                                    "lineHeight": "16px",
+                                    "letterSpacing": "0.05em",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "display-lg": [
+                            "48px",
+                            {
+                                    "lineHeight": "56px",
+                                    "letterSpacing": "-0.02em",
+                                    "fontWeight": "700"
+                            }
+                    ],
+                    "body-md": [
+                            "16px",
+                            {
+                                    "lineHeight": "28px",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "label-md": [
+                            "14px",
+                            {
+                                    "lineHeight": "20px",
+                                    "letterSpacing": "0.01em",
+                                    "fontWeight": "500"
+                            }
+                    ],
+                    "headline-lg": [
+                            "32px",
+                            {
+                                    "lineHeight": "40px",
+                                    "fontWeight": "600"
+                            }
+                    ]
+            }
+    },
+        },
+      }
+    </script>
+<style>
+        body {
+            -webkit-tap-highlight-color: transparent;
+        }
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        /* Hide scrollbar for IE, Edge and Firefox */
+        .no-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+        
+        .book-spine-glow {
+            box-shadow: inset 4px 0 8px -2px rgba(255, 255, 255, 0.4);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen pb-24 md:pb-8 flex flex-col font-body-md text-body-md antialiased selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopAppBar -->
+<header class="sticky top-0 z-40 bg-surface/80 backdrop-blur-md h-14 flat no shadows flex justify-between items-center px-margin-mobile w-full max-w-max-width-content mx-auto hidden md:flex">
+<div class="font-headline-md text-headline-md font-bold text-primary cursor-pointer active:scale-95 duration-250 ease-in-out">
+            Cozy Reader
+        </div>
+<nav class="flex gap-6 items-center hidden md:flex">
+<a class="text-on-surface-variant font-label-md text-label-md hover:bg-surface-container-low transition-colors px-3 py-2 rounded-lg" href="#">Home</a>
+<a class="text-primary font-bold font-label-md text-label-md px-3 py-2 rounded-lg" href="#">Library</a>
+<a class="text-on-surface-variant font-label-md text-label-md hover:bg-surface-container-low transition-colors px-3 py-2 rounded-lg" href="#">Progress</a>
+<a class="text-on-surface-variant font-label-md text-label-md hover:bg-surface-container-low transition-colors px-3 py-2 rounded-lg" href="#">Settings</a>
+</nav>
+<div class="flex items-center gap-4">
+<button class="text-primary cursor-pointer active:scale-95 duration-250 ease-in-out p-2 rounded-full hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">notifications</span>
+</button>
+<div class="w-8 h-8 rounded-full bg-surface-container overflow-hidden cursor-pointer active:scale-95 duration-250 ease-in-out hover:bg-surface-container-low transition-colors">
+<img alt="User profile" class="w-full h-full object-cover" data-alt="A close-up portrait of a relaxed person reading a book in a cozy, warm-lit room. Soft ambient light illuminates their face, reflecting a calm and serene mood, perfectly aligning with a tactile, minimalist reading application aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAzkgjp_O_ooSbXITAHeXOBj8M6YoMMftDgDkJrouwRcbCoQI3ykIDndbWKObvzWNaC5BwhIWwYiJaU2Nwx5G-e8K2YMdFJnny6-Iky53ArdxalHJSpQ3GHXWonowggK_a5um3_nqZm0NjLe6hI4lb9MsKw7d3w9kZjoIoIMMeTt06cq0R5EL4hnc6OyPL8uQosvmL9YRIIR3k0aGgc3hdlmQPCSoas6Ar5u1f7CA6hYPRB03c-OExHwQxlFJHB0X-NtrpQHRDq7zSo"/>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow w-full max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-6 md:py-12 space-y-10 md:space-y-16">
+<!-- Greeting & Search -->
+<section class="space-y-6">
+<div class="space-y-2">
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-on-surface">Good evening, Reader</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Your library is waiting.</p>
+</div>
+<!-- Search Bar -->
+<div class="relative max-w-2xl">
+<div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-outline">search</span>
+</div>
+<input class="w-full bg-surface-container-low border-b border-outline-variant focus:border-primary focus:ring-0 rounded-t-lg pl-12 pr-4 py-3 font-body-md text-body-md text-on-surface placeholder-outline transition-colors focus:bg-surface-container bg-opacity-50" placeholder="Search authors, titles, or tags..." type="text"/>
+</div>
+<!-- Category Chips -->
+<div class="flex overflow-x-auto no-scrollbar gap-3 pb-2 -mx-margin-mobile px-margin-mobile md:mx-0 md:px-0">
+<button class="flex-none bg-secondary-fixed text-on-secondary-fixed-variant px-4 py-1.5 rounded-full font-label-md text-label-md transition-colors whitespace-nowrap">All</button>
+<button class="flex-none bg-surface-container border border-outline-variant text-on-surface-variant px-4 py-1.5 rounded-full font-label-md text-label-md hover:bg-surface-container-high transition-colors whitespace-nowrap">Fiction</button>
+<button class="flex-none bg-surface-container border border-outline-variant text-on-surface-variant px-4 py-1.5 rounded-full font-label-md text-label-md hover:bg-surface-container-high transition-colors whitespace-nowrap">Non-Fiction</button>
+<button class="flex-none bg-surface-container border border-outline-variant text-on-surface-variant px-4 py-1.5 rounded-full font-label-md text-label-md hover:bg-surface-container-high transition-colors whitespace-nowrap">Poetry</button>
+<button class="flex-none bg-surface-container border border-outline-variant text-on-surface-variant px-4 py-1.5 rounded-full font-label-md text-label-md hover:bg-surface-container-high transition-colors whitespace-nowrap">Essays</button>
+</div>
+</section>
+<!-- Reading Now Section -->
+<section class="space-y-6">
+<h2 class="font-body-lg text-body-lg font-bold text-on-surface border-b border-outline-variant pb-2 inline-block">Reading Now</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<!-- Current Book Card 1 -->
+<article class="group flex gap-4 md:gap-6 bg-surface-container-lowest p-4 rounded-xl shadow-[0_4px_12px_rgba(105,92,81,0.06)] border border-surface-variant hover:shadow-[0_8px_24px_rgba(105,92,81,0.08)] transition-all duration-300 relative overflow-hidden">
+<!-- Subtle background tint -->
+<div class="absolute inset-0 bg-gradient-to-br from-surface-container-lowest to-surface-container-low opacity-50 pointer-events-none"></div>
+<div class="relative w-24 md:w-32 flex-shrink-0 aspect-[2/3] rounded shadow-[2px_2px_8px_rgba(105,92,81,0.15)] overflow-hidden book-spine-glow">
+<img alt="Book cover" class="w-full h-full object-cover" data-alt="A close-up shot of a heavily textured, vintage hardcover book lying flat on a smooth wooden desk. The lighting is warm and directional, suggesting late afternoon sun in a quiet library setting, fitting a tactile minimalist aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCx-gQzlKZB_KKOafIqQXYa8Q-1CSEHf28rlKj4SqgIYSHKKhunnLaSJMXpcrPH6jkCW_o87jEbnbSId3egwlH1HBpP01cCPlfAoSq7_zkVCWxoK4WSB_2DRl9pP71woPeWmgprUfhCfAlTUPQARdznAQ9vJG4e97h9wdH67Hd2DzsUtH5lwfPlrG3KAA3LwWI49LsXs1lCsHE_upwIpnZ1lAi7MT3-LIQ95bLgYfoj-9C1tl-PqrF3ZUMgTe-4Aynj_08gOltMdzW4"/>
+</div>
+<div class="flex flex-col justify-center flex-grow z-10 py-2">
+<div class="flex justify-between items-start mb-1">
+<span class="text-xs font-label-sm text-secondary uppercase tracking-wider">Fiction</span>
+<button class="text-outline-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">bookmark</span>
+</button>
+</div>
+<h3 class="font-body-lg text-body-lg text-on-surface font-semibold leading-tight mb-1">The Midnight Library</h3>
+<p class="font-label-md text-label-md text-on-surface-variant mb-4">Matt Haig</p>
+<div class="mt-auto space-y-2">
+<div class="flex justify-between text-xs font-label-sm text-on-surface-variant">
+<span>64%</span>
+<span>120 pages left</span>
+</div>
+<!-- Progress Line -->
+<div class="h-1 w-full bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full w-[64%]"></div>
+</div>
+</div>
+</div>
+</article>
+<!-- Current Book Card 2 -->
+<article class="group flex gap-4 md:gap-6 bg-surface-container-lowest p-4 rounded-xl shadow-[0_4px_12px_rgba(105,92,81,0.06)] border border-surface-variant hover:shadow-[0_8px_24px_rgba(105,92,81,0.08)] transition-all duration-300 relative overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-br from-surface-container-lowest to-surface-container-low opacity-50 pointer-events-none"></div>
+<div class="relative w-24 md:w-32 flex-shrink-0 aspect-[2/3] rounded shadow-[2px_2px_8px_rgba(105,92,81,0.15)] overflow-hidden book-spine-glow bg-surface-variant">
+<img alt="Book cover" class="w-full h-full object-cover" data-alt="A minimalist, abstract book cover design featuring gentle organic curves in muted earthy tones like parchment, soft amber, and deep brown. The cover sits on a clean, light surface with a soft, multi-layered ambient shadow." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBuTBascusRGsRTHbyEsM2Dd4gxx0VllkFyRa5JTjrykPIPdhnWl6B3Fsic2sYN-9iG4ZzNsgba9MDk_fYS2iH8ds6598blO1DombOxVZlskV15erBUQ0TfnfFP8CqH6iWF9AqgF6mCFJJljZIGUJ5wqBSUtMomfsXBiM-gPQTTBR012dP3xSDxBMfaVQTAdM-wId33xdRvBT9LpeIwaBuuxirwF9a7lI1Xu4HTjbFgaGE7RM8Gn1s9aW_RQ76mTUfiX5YPXnkFiyzm"/>
+</div>
+<div class="flex flex-col justify-center flex-grow z-10 py-2">
+<div class="flex justify-between items-start mb-1">
+<span class="text-xs font-label-sm text-secondary uppercase tracking-wider">Non-Fiction</span>
+<button class="text-outline-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">bookmark</span>
+</button>
+</div>
+<h3 class="font-body-lg text-body-lg text-on-surface font-semibold leading-tight mb-1">Atomic Habits</h3>
+<p class="font-label-md text-label-md text-on-surface-variant mb-4">James Clear</p>
+<div class="mt-auto space-y-2">
+<div class="flex justify-between text-xs font-label-sm text-on-surface-variant">
+<span>12%</span>
+<span>Ch. 3</span>
+</div>
+<div class="h-1 w-full bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full w-[12%]"></div>
+</div>
+</div>
+</div>
+</article>
+</div>
+</section>
+<!-- Up Next Grid -->
+<section class="space-y-6">
+<div class="flex justify-between items-end border-b border-outline-variant pb-2">
+<h2 class="font-body-lg text-body-lg font-bold text-on-surface">Up Next</h2>
+<button class="font-label-md text-label-md text-primary hover:text-surface-tint transition-colors">View All</button>
+</div>
+<div class="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-8">
+<!-- Grid Book 1 -->
+<div class="group flex flex-col gap-2 cursor-pointer">
+<div class="relative w-full aspect-[2/3] rounded shadow-[2px_4px_12px_rgba(105,92,81,0.08)] group-hover:shadow-[4px_8px_20px_rgba(105,92,81,0.12)] group-hover:-translate-y-1 transition-all duration-300 overflow-hidden book-spine-glow">
+<img alt="Book cover" class="w-full h-full object-cover" data-alt="A beautifully bound book with a plain textured canvas cover in deep teal, resting vertically against a soft, blurred background. The lighting is subtle, casting extremely soft amber-tinted shadows, emphasizing the tactile minimalism aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAZXLdqLfBw8_9uyju-LFij--j6ec_3GARXzl-c_w62yih2C4m8SKgwCCoP2QyMxYvLPcUhExekGE6k6qkrx5fkANk1U-BIH48kSdyTzLsTzBpADL-JPayVMsjW80Bz0WU1JwNR-52TJG6o-T0R3A3_ZbrrxWrNA2V9v6qdG5ffclcE9HpGehLCTX0HOx4JiG5pdP0tt9mTDKuLlQAguBg_c10ZVHT3BtAFm-3i8ZludgdMdufuLJikkkkpHMaVdHuOKkjhGpCRQ7cX"/>
+</div>
+<div class="px-1">
+<h4 class="font-label-md text-label-md text-on-surface font-semibold line-clamp-1 group-hover:text-primary transition-colors">Dune</h4>
+<p class="text-xs font-label-sm text-on-surface-variant line-clamp-1 font-normal">Frank Herbert</p>
+</div>
+</div>
+<!-- Grid Book 2 -->
+<div class="group flex flex-col gap-2 cursor-pointer">
+<div class="relative w-full aspect-[2/3] rounded shadow-[2px_4px_12px_rgba(105,92,81,0.08)] group-hover:shadow-[4px_8px_20px_rgba(105,92,81,0.12)] group-hover:-translate-y-1 transition-all duration-300 overflow-hidden book-spine-glow">
+<img alt="Book cover" class="w-full h-full object-cover" data-alt="A stack of aged, soft-cover books with visible, slightly worn edges on a pristine white desk. The top book features an understated, purely typographical cover design in elegant serif fonts. Soft, ambient lighting creates a calm, cozy reading vibe." src="https://lh3.googleusercontent.com/aida-public/AB6AXuByMEHa3dU3Rr8V87UORb199wkpqs-D2QgRsn8MtvC37c4LkgdR8okP-VPrMCNYrjiB34tcZMWcWKKmZJriYKr-4gfd7E_VDQCtDDTApuufYwvc3HFpVWgJtANlJtw_mZFRdRASZV-8KqKma9mj-fA_8TrAzJCA4wYIEytsEsYCJOt-Wjc5VJZItbkgcCqPXME5MGiRUP7sAITrrCqqoBPCZAnhZscvNe5Ca_bqsQTEvDIuzznpyGP7sXdGyZx7ly_hxCDCy7jRbamT"/>
+</div>
+<div class="px-1">
+<h4 class="font-label-md text-label-md text-on-surface font-semibold line-clamp-1 group-hover:text-primary transition-colors">Sapiens</h4>
+<p class="text-xs font-label-sm text-on-surface-variant line-clamp-1 font-normal">Yuval Noah Harari</p>
+</div>
+</div>
+<!-- Grid Book 3 -->
+<div class="group flex flex-col gap-2 cursor-pointer">
+<div class="relative w-full aspect-[2/3] rounded shadow-[2px_4px_12px_rgba(105,92,81,0.08)] group-hover:shadow-[4px_8px_20px_rgba(105,92,81,0.12)] group-hover:-translate-y-1 transition-all duration-300 overflow-hidden book-spine-glow">
+<img alt="Book cover" class="w-full h-full object-cover" data-alt="An open book lying flat beside a closed, leather-bound volume. The scene is illuminated by the soft, warm glow of a nearby desk lamp, creating gentle highlights on the paper texture, reflecting a timeless, grounding aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDu6pZcERLiuhEOW09QoQKr9LDForyXH8UFcrakmYA8XZoVF6eEV6WYZYdiT-UTY5Z9xS8Q-7u0E-rC6ga8n_bZYfNaqXPzRv3yfNz6o1BK1pbEHvb9Z0_wINmEoHkn3DGAl9pX4YbGP2jBv8IuqTiZSI1mGYtkABy6GAGiR_t73f3ALy0kz-xrenZi9lMZjHcwq4f74O_ecsurtWdmyYeXY1XUAQ6Okc723P2ptGv6Yc_BEw2pqsUDiUoNBLwVxk7_nPq5SssOXQog"/>
+</div>
+<div class="px-1">
+<h4 class="font-label-md text-label-md text-on-surface font-semibold line-clamp-1 group-hover:text-primary transition-colors">1984</h4>
+<p class="text-xs font-label-sm text-on-surface-variant line-clamp-1 font-normal">George Orwell</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Floating Action Button -->
+<button aria-label="Add new book" class="fixed bottom-20 md:bottom-8 right-6 md:right-8 bg-primary text-on-primary w-14 h-14 rounded-full flex items-center justify-center shadow-[0_4px_12px_rgba(141,75,0,0.3)] hover:bg-surface-tint hover:shadow-[0_8px_16px_rgba(141,75,0,0.4)] active:scale-95 transition-all duration-250 z-40 hidden md:flex">
+<span class="material-symbols-outlined text-3xl">add</span>
+</button>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-2 pb-safe bg-surface/90 backdrop-blur-lg rounded-t-xl shadow-sm md:hidden">
+<a class="flex flex-col items-center justify-center text-on-secondary-container px-4 py-1 hover:bg-secondary-container/50 active:scale-90 transition-transform duration-250" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">home</span>
+<span class="font-label-md text-label-md text-xs mt-1">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-xl px-4 py-1 active:scale-90 transition-transform duration-250" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">book_2</span>
+<span class="font-label-md text-label-md text-xs mt-1">Library</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-secondary-container px-4 py-1 hover:bg-secondary-container/50 active:scale-90 transition-transform duration-250" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">analytics</span>
+<span class="font-label-md text-label-md text-xs mt-1">Progress</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-secondary-container px-4 py-1 hover:bg-secondary-container/50 active:scale-90 transition-transform duration-250" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">settings</span>
+<span class="font-label-md text-label-md text-xs mt-1">Settings</span>
+</a>
+</nav>
+<button aria-label="Add new book" class="fixed bottom-[88px] right-4 bg-primary text-on-primary w-14 h-14 rounded-full flex items-center justify-center shadow-[0_4px_12px_rgba(141,75,0,0.3)] active:scale-95 transition-all duration-250 z-40 md:hidden">
+<span class="material-symbols-outlined text-3xl">add</span>
+</button>
+</body></html>

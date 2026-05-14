@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Reading Progress - Cozy Reader</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,200..900;1,7..72,200..900&amp;family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "tertiary": "#605b58",
+                      "on-secondary": "#ffffff",
+                      "surface": "#fbf9f4",
+                      "surface-variant": "#e4e2dd",
+                      "secondary": "#695c51",
+                      "tertiary-fixed-dim": "#ccc5c1",
+                      "tertiary-fixed": "#e8e1dd",
+                      "on-error-container": "#93000a",
+                      "primary-fixed-dim": "#ffb77d",
+                      "background": "#fbf9f4",
+                      "tertiary-container": "#797470",
+                      "on-secondary-fixed-variant": "#51443a",
+                      "on-error": "#ffffff",
+                      "error-container": "#ffdad6",
+                      "on-tertiary-fixed": "#1e1b19",
+                      "surface-bright": "#fbf9f4",
+                      "primary-container": "#b15f00",
+                      "on-tertiary-container": "#fffbff",
+                      "on-primary": "#ffffff",
+                      "on-primary-fixed-variant": "#6e3900",
+                      "outline-variant": "#dbc2b0",
+                      "surface-container-low": "#f5f3ee",
+                      "inverse-primary": "#ffb77d",
+                      "surface-dim": "#dbdad5",
+                      "on-tertiary-fixed-variant": "#4a4643",
+                      "error": "#ba1a1a",
+                      "surface-container-lowest": "#ffffff",
+                      "surface-container-high": "#eae8e3",
+                      "primary-fixed": "#ffdcc3",
+                      "on-surface-variant": "#554336",
+                      "surface-container-highest": "#e4e2dd",
+                      "secondary-container": "#efdcce",
+                      "primary": "#8d4b00",
+                      "on-background": "#1b1c19",
+                      "inverse-on-surface": "#f2f1ec",
+                      "on-primary-fixed": "#2f1500",
+                      "on-secondary-container": "#6e6055",
+                      "inverse-surface": "#30312e",
+                      "secondary-fixed-dim": "#d5c3b6",
+                      "secondary-fixed": "#f2dfd1",
+                      "outline": "#887364",
+                      "on-surface": "#1b1c19",
+                      "on-tertiary": "#ffffff",
+                      "surface-tint": "#904d00",
+                      "on-primary-container": "#fffbff",
+                      "surface-container": "#f0eee9",
+                      "on-secondary-fixed": "#231a11"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "container-max": "1120px",
+                      "unit": "8px",
+                      "margin-mobile": "20px",
+                      "gutter": "24px",
+                      "margin-desktop": "64px"
+              },
+              "fontFamily": {
+                      "headline-lg-mobile": [
+                              "Literata"
+                      ],
+                      "body-lg": [
+                              "Literata"
+                      ],
+                      "label-sm": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "display-lg": [
+                              "Literata"
+                      ],
+                      "body-md": [
+                              "Literata"
+                      ],
+                      "label-md": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "headline-lg": [
+                              "Literata"
+                      ]
+              },
+              "fontSize": {
+                      "headline-lg-mobile": [
+                              "28px",
+                              {
+                                      "lineHeight": "36px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-sm": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "display-lg": [
+                              "48px",
+                              {
+                                      "lineHeight": "56px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "letterSpacing": "0.01em",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "fontWeight": "600"
+                              }
+                      ]
+              }
+            }
+          }
+        }
+    </script>
+<style>
+        /* Custom subtle shadow for tactile feel */
+        .shadow-tactile {
+            box-shadow: 0 4px 24px -4px rgba(141, 75, 0, 0.06), 0 2px 8px -2px rgba(105, 92, 81, 0.04);
+        }
+        /* Book spine inner glow simulation */
+        .book-spine-effect {
+            box-shadow: inset 3px 0 6px -2px rgba(255, 255, 255, 0.6), 2px 4px 12px rgba(105, 92, 81, 0.15);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body-md min-h-screen pb-24 md:pb-0 antialiased selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopAppBar -->
+<header class="bg-surface/80 backdrop-blur-md sticky top-0 w-full z-40 transition-colors">
+<div class="flex justify-between items-center px-margin-mobile md:px-margin-desktop w-full max-w-container-max mx-auto h-14">
+<div class="font-headline-md text-headline-md font-bold text-primary cursor-pointer">Cozy Reader</div>
+<!-- Desktop Navigation (Hidden on Mobile) -->
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-on-surface-variant font-label-md text-label-md hover:bg-surface-container-low transition-colors px-3 py-1.5 rounded-lg" href="#">Home</a>
+<a class="text-on-surface-variant font-label-md text-label-md hover:bg-surface-container-low transition-colors px-3 py-1.5 rounded-lg" href="#">Library</a>
+<a class="text-primary font-bold font-label-md text-label-md px-3 py-1.5" href="#">Progress</a>
+<a class="text-on-surface-variant font-label-md text-label-md hover:bg-surface-container-low transition-colors px-3 py-1.5 rounded-lg" href="#">Settings</a>
+</nav>
+<div class="flex items-center gap-4">
+<button class="text-on-surface-variant hover:bg-surface-container-low transition-colors p-2 rounded-full cursor-pointer active:scale-95 duration-250 ease-in-out flex items-center justify-center">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">notifications</span>
+</button>
+<img alt="User profile" class="w-8 h-8 rounded-full border border-outline-variant object-cover cursor-pointer" data-alt="A close-up portrait of a young woman with a relaxed, serene expression, bathed in warm, soft natural light suggestive of late afternoon sun filtering through a window. The background is softly blurred in earthy tones, creating an intimate and cozy mood that matches a quiet reading environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAipFwlk5yI6Fhpiakl6d6c7A1ZXP12nyK2Lhi4IZppxq_8YQIXoilwUzrDAHTZlLCyysVpQvt1ua-BZ5Ac57k9xeqIX6DVpLno3S7I8wBmUgiSbEaqzk_jUS4jl6TZVGo6udStD0fJ5zl-MQm_zGYeD79d-wn2Eyw8nyspu5oIpU-mLzlEgTCqNqgk_eq3mjCRVqTG3tHEUgwS6nPBUW_m00LydE5ZyAsejjXkZYKgI-y5WdJSIf8RQljmDOLshbQytdddrhkO_0yG"/>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-8 md:py-12">
+<!-- Page Title -->
+<div class="mb-8 md:mb-12">
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-on-surface tracking-tight">Reading Progress</h1>
+<p class="font-body-md text-body-md text-on-surface-variant mt-2 max-w-2xl">Track your journey through the pages. Every chapter read is a step towards your reading goals.</p>
+</div>
+<!-- Bento Grid Dashboard -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-unit*2 md:gap-gutter">
+<!-- Streak Card (Spans 4 columns on desktop) -->
+<div class="md:col-span-4 bg-surface-container-lowest rounded-xl p-8 shadow-tactile border border-outline-variant/20 flex flex-col items-center justify-center text-center relative overflow-hidden group hover:-translate-y-1 transition-transform duration-300">
+<div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary/20 via-primary to-primary/20"></div>
+<div class="w-16 h-16 rounded-full bg-primary-container/30 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-500">
+<span class="material-symbols-outlined text-primary text-4xl" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+</div>
+<div class="font-display-lg text-display-lg text-on-surface leading-none mb-1">12 <span class="font-headline-lg text-headline-lg text-on-surface-variant align-baseline">Days</span></div>
+<div class="font-label-md text-label-md text-on-surface-variant uppercase tracking-[0.1em] mt-2">Current Streak</div>
+</div>
+<!-- Goal Ring Card (Spans 4 columns on desktop) -->
+<div class="md:col-span-4 bg-surface-container-lowest rounded-xl p-6 shadow-tactile border border-outline-variant/20 flex flex-col items-center justify-center relative hover:-translate-y-1 transition-transform duration-300">
+<div class="w-full flex justify-between items-center mb-2">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-[0.1em]">Monthly Goal</span>
+<span class="material-symbols-outlined text-outline text-sm" style="font-variation-settings: 'FILL' 0;">emoji_events</span>
+</div>
+<div class="relative w-36 h-36 mt-4 flex items-center justify-center">
+<!-- Background Ring -->
+<svg class="w-full h-full transform -rotate-90 absolute top-0 left-0" viewbox="0 0 100 100">
+<circle class="stroke-surface-container-high" cx="50" cy="50" fill="transparent" r="42" stroke-width="6"></circle>
+</svg>
+<!-- Progress Ring -->
+<svg class="w-full h-full transform -rotate-90 absolute top-0 left-0" viewbox="0 0 100 100">
+<!-- Dash array: 2 * pi * r = 2 * 3.14159 * 42 = ~263.89 -->
+<!-- 80% of 263.89 = 211.11. Offset = 263.89 - 211.11 = 52.78 -->
+<circle class="stroke-primary drop-shadow-[0_2px_4px_rgba(141,75,0,0.3)] transition-all duration-1000 ease-out" cx="50" cy="50" fill="transparent" r="42" stroke-dasharray="263.89" stroke-dashoffset="52.78" stroke-linecap="round" stroke-width="8"></circle>
+</svg>
+<div class="absolute flex flex-col items-center justify-center text-center">
+<span class="font-headline-lg text-headline-lg text-on-surface leading-none">80%</span>
+</div>
+</div>
+<div class="font-body-md text-body-md text-on-surface-variant mt-4 text-center bg-surface-container-low px-4 py-1.5 rounded-full inline-flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+                    4 of 5 books read
+                </div>
+</div>
+<!-- Daily Activity Chart (Spans 4 columns on desktop) -->
+<div class="md:col-span-4 bg-surface-container-lowest rounded-xl p-6 shadow-tactile border border-outline-variant/20 flex flex-col hover:-translate-y-1 transition-transform duration-300">
+<div class="flex justify-between items-center mb-6">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-[0.1em]">Daily Reading</span>
+<span class="font-label-sm text-label-sm text-outline">Minutes</span>
+</div>
+<!-- Chart Container -->
+<div class="flex items-end justify-between flex-grow gap-1.5 md:gap-2 h-32 relative">
+<!-- Grid Lines (Decorative) -->
+<div class="absolute inset-0 flex flex-col justify-between pointer-events-none opacity-20">
+<div class="w-full border-t border-outline-variant border-dashed"></div>
+<div class="w-full border-t border-outline-variant border-dashed"></div>
+<div class="w-full border-t border-outline-variant border-dashed"></div>
+</div>
+<!-- Bars -->
+<div class="w-full bg-secondary-container rounded-t h-[30%] hover:bg-secondary-fixed transition-colors cursor-pointer relative group z-10">
+<div class="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-inverse-surface text-inverse-on-surface font-label-sm text-label-sm py-1 px-2 rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap shadow-md">15m</div>
+</div>
+<div class="w-full bg-secondary-container rounded-t h-[65%] hover:bg-secondary-fixed transition-colors cursor-pointer relative group z-10">
+<div class="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-inverse-surface text-inverse-on-surface font-label-sm text-label-sm py-1 px-2 rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap shadow-md">45m</div>
+</div>
+<div class="w-full bg-secondary-container rounded-t h-[40%] hover:bg-secondary-fixed transition-colors cursor-pointer relative group z-10">
+<div class="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-inverse-surface text-inverse-on-surface font-label-sm text-label-sm py-1 px-2 rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap shadow-md">25m</div>
+</div>
+<div class="w-full bg-secondary-container rounded-t h-[80%] hover:bg-secondary-fixed transition-colors cursor-pointer relative group z-10">
+<div class="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-inverse-surface text-inverse-on-surface font-label-sm text-label-sm py-1 px-2 rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap shadow-md">60m</div>
+</div>
+<div class="w-full bg-secondary-container rounded-t h-[20%] hover:bg-secondary-fixed transition-colors cursor-pointer relative group z-10">
+<div class="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-inverse-surface text-inverse-on-surface font-label-sm text-label-sm py-1 px-2 rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap shadow-md">10m</div>
+</div>
+<!-- Today's Bar (Highlight) -->
+<div class="w-full bg-primary rounded-t h-[95%] cursor-pointer relative group z-10 shadow-[0_0_12px_rgba(141,75,0,0.3)]">
+<div class="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-inverse-surface text-inverse-on-surface font-label-sm text-label-sm py-1 px-2 rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap shadow-md">85m</div>
+</div>
+<!-- Future Day -->
+<div class="w-full bg-surface-container-high rounded-t h-[5%] z-10 opacity-50"></div>
+</div>
+<!-- X-Axis Labels -->
+<div class="flex justify-between mt-3 font-label-sm text-label-sm text-on-surface-variant px-1">
+<span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span class="text-primary font-bold">S</span><span>S</span>
+</div>
+</div>
+</div>
+<!-- Recently Finished Section -->
+<section class="mt-16 mb-8">
+<div class="flex justify-between items-end mb-6 border-b border-surface-variant pb-4">
+<h2 class="font-headline-md text-headline-md text-on-surface">Recently Finished</h2>
+<a class="text-primary font-label-md text-label-md hover:underline hover:text-primary-container transition-colors flex items-center gap-1 group" href="#">
+                    View All <span class="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform" style="font-variation-settings: 'FILL' 0;">arrow_forward</span>
+</a>
+</div>
+<!-- Horizontal Scroll Container -->
+<div class="flex gap-6 overflow-x-auto pb-6 snap-x snap-mandatory hide-scrollbar -mx-margin-mobile px-margin-mobile md:mx-0 md:px-0">
+<!-- Book Card 1 -->
+<div class="snap-start shrink-0 w-[140px] md:w-[160px] flex flex-col gap-3 group cursor-pointer">
+<div class="relative w-full aspect-[2/3] rounded-md overflow-hidden bg-surface-container-high border-l-[3px] border-l-surface-container-lowest/60 book-spine-effect group-hover:-translate-y-2 transition-all duration-300">
+<img alt="Book cover of The Alchemist" class="w-full h-full object-cover" data-alt="A vintage, slightly worn book cover sitting on a sunlit wooden desk. The cover features an abstract, minimalist geometric landscape in warm amber, cream, and deep teal tones. The lighting is soft and natural, casting elegant, long shadows that emphasize the tactile quality of the textured paper dust jacket, evoking a cozy, tactile reading environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCDmiwEYBaVhs9-vYsVisoOFBY079OZSyd7m0SJqBtA3-fdQkwMgwgWYobHtJzZk2T9_YS0Ok87G03AC8nYNAX2T57KxvbpgFratg8bU5MM95d6AHiTZ8JXMWsC_13o2eViJwEQjjjuYh0I_lt7q1i2G5ZYnWeS65eT5hdvBBwL0Az4YL42oMvyX1XQKPpbCVJt0JdsidpV2RPFxZn-S0VClbNbhkwmAIl9uSETEaHPj95Apbip9Bc9LPlgG0NfJc7AFhVznyBUUr2N"/>
+<!-- Bookmark Ribbon Overlay -->
+<div class="absolute top-0 right-4 w-4 h-8 bg-secondary shadow-sm shadow-black/20" style="clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 80%, 0 100%);"></div>
+</div>
+<div>
+<h3 class="font-label-md text-label-md text-on-surface truncate group-hover:text-primary transition-colors">The Alchemist</h3>
+<p class="font-label-sm text-label-sm text-on-surface-variant truncate">Paulo Coelho</p>
+<!-- Star Rating -->
+<div class="flex items-center gap-0.5 mt-1 text-primary-fixed-dim">
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star_half</span>
+</div>
+</div>
+</div>
+<!-- Book Card 2 -->
+<div class="snap-start shrink-0 w-[140px] md:w-[160px] flex flex-col gap-3 group cursor-pointer">
+<div class="relative w-full aspect-[2/3] rounded-md overflow-hidden bg-surface-container-high border-l-[3px] border-l-surface-container-lowest/60 book-spine-effect group-hover:-translate-y-2 transition-all duration-300">
+<img alt="Book cover of Dune" class="w-full h-full object-cover" data-alt="A striking, modern book cover leaning against a soft linen background. The cover design relies on deep blacks and pristine whites, punctuated by intense accents of vibrant orange, depicting minimalist sand dunes. High-key, soft white lighting creates a bright, modern aesthetic, highlighting the sleek, matte finish of the book's surface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCUCnnuLOECGZfYrENPUi12EV9ugRZyRvASx3KeeB5zgJdkp8dNFW8ynr41MnPxPKBsT-Ilm_yX-K652kq-DkKxOFd4X_vrZ93XjCfydtP8JD7wjpGIc1FVpI8VRqWmEo6rgJNFAAqDsOKomTLpYZWxq39pdhcCkbtYWrVQYvtwbFjuppEkBaZqUjgem0X1EbCqE6GMtHf32bnJTPxykmG7AXAZAyTfvA46Z1NbYxEM_B4TOtLz_3VJTxej0QvZZDH4gJK4SuzQjEs8"/>
+</div>
+<div>
+<h3 class="font-label-md text-label-md text-on-surface truncate group-hover:text-primary transition-colors">Dune</h3>
+<p class="font-label-sm text-label-sm text-on-surface-variant truncate">Frank Herbert</p>
+<div class="flex items-center gap-0.5 mt-1 text-primary-fixed-dim">
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+</div>
+</div>
+<!-- Book Card 3 -->
+<div class="snap-start shrink-0 w-[140px] md:w-[160px] flex flex-col gap-3 group cursor-pointer">
+<div class="relative w-full aspect-[2/3] rounded-md overflow-hidden bg-surface-container-high border-l-[3px] border-l-surface-container-lowest/60 book-spine-effect group-hover:-translate-y-2 transition-all duration-300">
+<img alt="Book cover of Atomic Habits" class="w-full h-full object-cover" data-alt="A clean, minimalist book cover resting on a smooth parchment-colored surface. The cover features simple, bold typography over a subtle, off-white background with a hint of warm yellow. Ambient, soft shadows give the book a profound sense of physical depth and weight, capturing a timeless, grounded reading aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAgiFpdW7EqmZlpBnc5Ew-vQqZTi4IpkX5p-g-nlSnU3ccHSXMe8vFUoT4X12SAPz0dXBhaszz5ppFM_qQgFnvmtem2cVQLqQv7oxyePNkiEcI4SmzB-LfgK_KDHR6MxzQVQGXymIOoOSWgXbJ2VEhEhUchA1k1kKoLRBSL5qBkOyS72tdUGJNvx-EL1YrEfC79T5I2zr1FScmgJwHt2qItK4ajUqz7pzKWk7ymCcCxhXL7dsEV70tQLaqSXYJhxKVWFO-HIEdenMDn"/>
+</div>
+<div>
+<h3 class="font-label-md text-label-md text-on-surface truncate group-hover:text-primary transition-colors">Atomic Habits</h3>
+<p class="font-label-sm text-label-sm text-on-surface-variant truncate">James Clear</p>
+<div class="flex items-center gap-0.5 mt-1 text-primary-fixed-dim">
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 0;">star</span>
+</div>
+</div>
+</div>
+<!-- Empty State/Discover Card -->
+<div class="snap-start shrink-0 w-[140px] md:w-[160px] flex flex-col gap-3 group cursor-pointer justify-center items-center">
+<div class="relative w-full aspect-[2/3] rounded-md overflow-hidden bg-surface-container-low border border-dashed border-outline-variant flex flex-col items-center justify-center group-hover:bg-surface-container transition-colors duration-300">
+<span class="material-symbols-outlined text-outline text-3xl mb-2" style="font-variation-settings: 'FILL' 0;">add_circle</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant text-center px-4">Find your next read</span>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden bg-surface/90 backdrop-blur-lg fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-2 pb-safe border-t border-surface-container-low shadow-[0_-4px_12px_rgba(0,0,0,0.05)] rounded-t-xl">
+<!-- Home -->
+<a class="flex flex-col items-center justify-center text-on-secondary-container px-4 py-1 hover:bg-secondary-container/50 active:scale-90 transition-transform duration-250 rounded-xl group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors" style="font-variation-settings: 'FILL' 0;">home</span>
+<span class="font-label-sm text-[10px] leading-tight mt-1 group-hover:text-primary transition-colors">Home</span>
+</a>
+<!-- Library -->
+<a class="flex flex-col items-center justify-center text-on-secondary-container px-4 py-1 hover:bg-secondary-container/50 active:scale-90 transition-transform duration-250 rounded-xl group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors" style="font-variation-settings: 'FILL' 0;">book_2</span>
+<span class="font-label-sm text-[10px] leading-tight mt-1 group-hover:text-primary transition-colors">Library</span>
+</a>
+<!-- Progress (Active) -->
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-xl px-4 py-1 active:scale-90 transition-transform duration-250 shadow-sm shadow-primary-container/20" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">analytics</span>
+<span class="font-label-sm text-[10px] leading-tight mt-1 font-bold">Progress</span>
+</a>
+<!-- Settings -->
+<a class="flex flex-col items-center justify-center text-on-secondary-container px-4 py-1 hover:bg-secondary-container/50 active:scale-90 transition-transform duration-250 rounded-xl group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors" style="font-variation-settings: 'FILL' 0;">settings</span>
+<span class="font-label-sm text-[10px] leading-tight mt-1 group-hover:text-primary transition-colors">Settings</span>
+</a>
+</nav>
+<!-- Safe area padding for mobile standalone PWA mode -->
+<style>
+        @supports (padding-bottom: env(safe-area-inset-bottom)) {
+            .pb-safe {
+                padding-bottom: calc(0.5rem + env(safe-area-inset-bottom));
+            }
+        }
+        /* Hide scrollbar for horizontal lists but allow scrolling */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</body></html>
