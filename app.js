@@ -1,5 +1,5 @@
-// Cozy Reader — single-file app
-// Vanilla JS + IndexedDB + PDF.js (loaded into window.pdfjsLib by the module shim in index.html)
+// Cozy Reader — PWA app logic.
+// Vanilla JS. PDF.js + epub.js. IndexedDB storage. No build step.
 
 (() => {
   "use strict";
@@ -40,7 +40,7 @@
     clearTimeout(toast._t);
     toast._t = setTimeout(() => el.classList.add("hidden"), ms);
   };
-  const waitFor = (cond, timeoutMs = 10000) =>
+  const waitFor = (cond, timeoutMs = 15000) =>
     new Promise((res, rej) => {
       const t0 = Date.now();
       (function poll() {
@@ -49,29 +49,53 @@
         setTimeout(poll, 50);
       })();
     });
+  function escapeHtml(s = "") {
+    return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" }[c]));
+  }
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
   // ---------- IndexedDB ----------
   const DB_NAME = "cozy-reader";
-  const DB_VERSION = 1;
+  const DB_VERSION = 3;
   let dbp = null;
   function openDB() {
     if (dbp) return dbp;
     dbp = new Promise((resolve, reject) => {
       const req = indexedDB.open(DB_NAME, DB_VERSION);
-      req.onupgradeneeded = () => {
+      req.onupgradeneeded = (e) => {
         const db = req.result;
-        if (!db.objectStoreNames.contains("books")) {
+        const trans = req.transaction;
+        if (e.oldVersion < 1) {
           const s = db.createObjectStore("books", { keyPath: "id" });
           s.createIndex("addedAt", "addedAt");
           s.createIndex("lastReadAt", "lastReadAt");
-        }
-        if (!db.objectStoreNames.contains("sessions")) {
-          const s = db.createObjectStore("sessions", { keyPath: "id", autoIncrement: true });
-          s.createIndex("bookId", "bookId");
-          s.createIndex("endAt", "endAt");
-        }
-        if (!db.objectStoreNames.contains("prefs")) {
+          const ss = db.createObjectStore("sessions", { keyPath: "id", autoIncrement: true });
+          ss.createIndex("bookId", "bookId");
+          ss.createIndex("endAt", "endAt");
           db.createObjectStore("prefs", { keyPath: "key" });
+        }
+        if (e.oldVersion < 2) {
+          if (!db.objectStoreNames.contains("files")) db.createObjectStore("files", { keyPath: "id" });
+          const booksStore = trans.objectStore("books");
+          const filesStore = trans.objectStore("files");
+          const cursorReq = booksStore.openCursor();
+          cursorReq.onsuccess = (ev) => {
+            const cursor = ev.target.result;
+            if (!cursor) return;
+            const b = cursor.value;
+            if (b && b.fileBlob) {
+              filesStore.put({ id: b.id, blob: b.fileBlob });
+              delete b.fileBlob;
+              cursor.update(b);
+            }
+            cursor.continue();
+          };
+        }
+        if (e.oldVersion < 3) {
+          if (!db.objectStoreNames.contains("highlights")) {
+            const hs = db.createObjectStore("highlights", { keyPath: "id" });
+            hs.createIndex("bookId", "bookId");
+          }
         }
       };
       req.onsuccess = () => resolve(req.result);
@@ -88,24 +112,61 @@
     async get(store, key) { const s = await tx(store); return new Promise((res, rej) => { const r = s.get(key); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }); },
     async del(store, key) { const s = await tx(store, "readwrite"); return new Promise((res, rej) => { const r = s.delete(key); r.onsuccess = () => res(); r.onerror = () => rej(r.error); }); },
     async all(store) { const s = await tx(store); return new Promise((res, rej) => { const r = s.getAll(); r.onsuccess = () => res(r.result || []); r.onerror = () => rej(r.error); }); },
+    async allByIndex(store, indexName, key) {
+      const s = await tx(store);
+      return new Promise((res, rej) => {
+        const r = s.index(indexName).getAll(key);
+        r.onsuccess = () => res(r.result || []);
+        r.onerror = () => rej(r.error);
+      });
+    },
     async clear(store) { const s = await tx(store, "readwrite"); return new Promise((res, rej) => { const r = s.clear(); r.onsuccess = () => res(); r.onerror = () => rej(r.error); }); },
   };
 
   // ---------- Prefs ----------
-  const PREF_DEFAULTS = { fontSize: 18, lineHeight: 17, pageWidth: 720 };
+  const PREF_DEFAULTS = {
+    theme: "light",        // light | sepia | dark
+    pageWidth: 720,        // PDF page width
+    brightness: 100,       // 40..100 (% effective)
+    fontFamily: "Literata",
+    fontSize: 18,          // EPUB px
+    lineHeight: 16,        // EPUB 1.x10 (16 = 1.6)
+    margin: 24,            // EPUB margin px
+  };
+  let cachedPrefs = { ...PREF_DEFAULTS };
   async function loadPrefs() {
     const all = await idb.all("prefs");
     const out = { ...PREF_DEFAULTS };
     for (const p of all) out[p.key] = p.value;
     return out;
   }
-  async function setPref(key, value) { await idb.put("prefs", { key, value }); applyPrefsToCSS(); }
-  let cachedPrefs = { ...PREF_DEFAULTS };
-  function applyPrefsToCSS() {
-    const r = document.documentElement.style;
-    r.setProperty("--reader-font-size", cachedPrefs.fontSize + "px");
-    r.setProperty("--reader-line-height", (cachedPrefs.lineHeight / 10).toFixed(1));
-    r.setProperty("--reader-page-width", cachedPrefs.pageWidth + "px");
+  async function setPref(key, value) {
+    cachedPrefs[key] = value;
+    await idb.put("prefs", { key, value });
+  }
+
+  // ---------- Theme ----------
+  const THEME_BG = { light: "#fbf9f4", sepia: "#f3e8d2", dark: "#14130e" };
+  function applyTheme(theme) {
+    if (!["light", "sepia", "dark"].includes(theme)) theme = "light";
+    document.documentElement.setAttribute("data-theme", theme);
+    const meta = document.getElementById("themeColorMeta");
+    if (meta) meta.setAttribute("content", THEME_BG[theme]);
+    // Update quick-toggle icon
+    const icon = document.getElementById("themeQuickIcon");
+    if (icon) icon.textContent = theme === "dark" ? "light_mode" : "dark_mode";
+    // Re-apply EPUB theme if reading
+    if (readerState && readerState.format === "epub" && readerState.rendition) {
+      applyEpubReaderStyles();
+    }
+    // Mark active theme pickers
+    $$("[data-theme-pick]").forEach((b) => b.classList.toggle("is-active", b.dataset.themePick === theme));
+  }
+  function applyBrightness(pct) {
+    const clamped = Math.max(40, Math.min(100, +pct || 100));
+    const f = clamped >= 100 ? "" : `brightness(${(clamped / 100).toFixed(2)})`;
+    const apply = (id) => { const el = document.getElementById(id); if (el) el.style.filter = f; };
+    apply("pdfStage"); apply("epubStage");
   }
 
   // ---------- PDF helpers ----------
@@ -114,13 +175,12 @@
     const buf = await blob.arrayBuffer();
     return await window.pdfjsLib.getDocument({ data: buf }).promise;
   }
-  async function renderPageToCanvas(pdf, pageNum, canvas, maxWidth) {
+  async function renderPageToCanvas(pdf, pageNum, canvas, cssWidth) {
     const page = await pdf.getPage(pageNum);
     const baseViewport = page.getViewport({ scale: 1 });
-    const targetWidth = Math.min(maxWidth, baseViewport.width * 2);
-    const scale = targetWidth / baseViewport.width;
-    const viewport = page.getViewport({ scale });
-    const dpr = window.devicePixelRatio || 1;
+    const cssScale = cssWidth / baseViewport.width;
+    const viewport = page.getViewport({ scale: cssScale });
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
     canvas.width = Math.floor(viewport.width * dpr);
     canvas.height = Math.floor(viewport.height * dpr);
     canvas.style.width = viewport.width + "px";
@@ -128,9 +188,29 @@
     const ctx = canvas.getContext("2d");
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     await page.render({ canvasContext: ctx, viewport }).promise;
-    return { width: viewport.width, height: viewport.height };
+    return { page, viewport, cssScale };
   }
-  async function extractCoverBlob(pdf, maxWidth = 480) {
+  async function renderPdfTextLayer(page, viewport, container, cssScale) {
+    if (!container) return;
+    container.innerHTML = "";
+    container.style.width = viewport.width + "px";
+    container.style.height = viewport.height + "px";
+    container.style.setProperty("--scale-factor", String(cssScale));
+    try {
+      if (window.pdfjsLib && window.pdfjsLib.TextLayer) {
+        const textContent = await page.getTextContent();
+        const tl = new window.pdfjsLib.TextLayer({
+          textContentSource: textContent,
+          container, viewport,
+        });
+        await tl.render();
+      }
+    } catch (e) {
+      // Text layer is a nice-to-have; failure shouldn't break reading.
+      console.warn("text layer failed", e);
+    }
+  }
+  async function extractPdfCoverBlob(pdf, maxWidth = 480) {
     const page = await pdf.getPage(1);
     const baseViewport = page.getViewport({ scale: 1 });
     const scale = maxWidth / baseViewport.width;
@@ -141,35 +221,43 @@
     await page.render({ canvasContext: c.getContext("2d"), viewport }).promise;
     return await new Promise((res) => c.toBlob((b) => res(b), "image/jpeg", 0.82));
   }
-  async function extractTitleFromMetadata(pdf, fallbackFromName) {
+  async function extractPdfMeta(pdf, fallback) {
     try {
       const md = await pdf.getMetadata();
       const info = md && md.info ? md.info : {};
       const title = (info.Title || "").trim();
       const author = (info.Author || "").trim();
-      return {
-        title: title || fallbackFromName,
-        author: author || "Unknown author",
-      };
-    } catch {
-      return { title: fallbackFromName, author: "Unknown author" };
-    }
+      return { title: title || fallback, author: author || "Unknown author" };
+    } catch { return { title: fallback, author: "Unknown author" }; }
   }
 
-  // ---------- Book model helpers ----------
-  function bookProgress(b) {
-    if (!b.pageCount || b.pageCount < 1) return 0;
-    return Math.min(1, (b.lastPage || 0) / b.pageCount);
+  // ---------- EPUB helpers ----------
+  async function openEpubFromBlob(blob) {
+    await waitFor(() => !!window.ePub);
+    const buf = await blob.arrayBuffer();
+    const book = window.ePub(buf);
+    await book.ready;
+    return book;
   }
-  function isFinished(b) {
-    return b.finishedAt || (b.pageCount > 0 && (b.lastPage || 0) >= b.pageCount);
+  async function extractEpubCoverBlob(book) {
+    try {
+      const url = await book.coverUrl();
+      if (!url) return null;
+      const res = await fetch(url);
+      if (!res.ok) return null;
+      return await res.blob();
+    } catch { return null; }
   }
-  function isStarted(b) {
-    return (b.lastPage || 0) > 0 && !isFinished(b);
+  function getEpubMeta(book, fallback) {
+    const m = (book.packaging && book.packaging.metadata) || {};
+    return {
+      title: (m.title || "").trim() || fallback,
+      author: (m.creator || "").trim() || "Unknown author",
+    };
   }
 
-  // ---------- Cover URL cache (revoke on view swap) ----------
-  let coverUrls = new Map(); // bookId -> objectURL
+  // ---------- Cover URL cache ----------
+  let coverUrls = new Map();
   function coverURL(book) {
     if (!book.coverBlob) return null;
     if (!coverUrls.has(book.id)) coverUrls.set(book.id, URL.createObjectURL(book.coverBlob));
@@ -180,23 +268,15 @@
     coverUrls.clear();
   }
 
-  // ---------- Slider behavior (touch + arrows + scrubber) ----------
+  // ---------- Slider behavior ----------
   function bindSlider(host) {
     const track = host.querySelector("[data-slider-track]");
     const left = host.querySelector('.slider-arrow[data-dir="-1"]');
     const right = host.querySelector('.slider-arrow[data-dir="1"]');
     const scrub = host.querySelector(".slider-scrub");
-
     function maxScroll() { return Math.max(0, track.scrollWidth - track.clientWidth); }
-    function pct() {
-      const max = maxScroll();
-      return max ? (track.scrollLeft / max) * 100 : 0;
-    }
-    function updateScrub() {
-      const p = pct();
-      scrub.value = p;
-      scrub.style.setProperty("--p", p + "%");
-    }
+    function pct() { const max = maxScroll(); return max ? (track.scrollLeft / max) * 100 : 0; }
+    function updateScrub() { const p = pct(); scrub.value = p; scrub.style.setProperty("--p", p + "%"); }
     function step(dir) {
       const card = track.querySelector(":scope > *");
       const cardW = card ? card.getBoundingClientRect().width + 16 : track.clientWidth * 0.8;
@@ -207,13 +287,10 @@
     track.addEventListener("scroll", () => requestAnimationFrame(updateScrub), { passive: true });
     scrub.addEventListener("input", () => {
       const max = maxScroll();
-      const target = (parseFloat(scrub.value) / 100) * max;
-      track.scrollLeft = target;
+      track.scrollLeft = (parseFloat(scrub.value) / 100) * max;
       scrub.style.setProperty("--p", scrub.value + "%");
     });
-    // Initial
     requestAnimationFrame(updateScrub);
-    // Hide controls if not scrollable
     function evalScrollable() {
       const scrollable = maxScroll() > 4;
       host.querySelector(".slider-controls").style.display = scrollable ? "" : "none";
@@ -222,7 +299,6 @@
     new ResizeObserver(evalScrollable).observe(track);
   }
 
-  // ---------- Range input progress fill ----------
   function bindRangeFill(input) {
     const update = () => {
       const min = parseFloat(input.min) || 0;
@@ -261,6 +337,7 @@
     }
     revokeCovers();
     activeNav();
+    closeOptionsSheet();
     const hash = location.hash || "#/library";
     const inReader = hash.startsWith("#/reader/");
     document.body.classList.toggle("is-reader", inReader);
@@ -273,7 +350,7 @@
     await fn();
   }
 
-  // ---------- VIEWS ----------
+  // ---------- Templates ----------
   function mountTemplate(id) {
     const root = $("#viewRoot");
     root.innerHTML = "";
@@ -283,7 +360,7 @@
     return root;
   }
 
-  // Build a book card DOM
+  // ---------- Book card ----------
   function makeCard(book, opts = {}) {
     const wide = !!opts.wide;
     const wrap = document.createElement("article");
@@ -293,9 +370,11 @@
     const tot = book.pageCount || 0;
     const pct = tot ? Math.round((cur / tot) * 100) : 0;
     const url = coverURL(book);
-    const coverInner = url
+    const formatBadge = book.format === "epub" ? `<span class="format-badge">EPUB</span>` : `<span class="format-badge">PDF</span>`;
+    const coverInner = (url
       ? `<img alt="${escapeHtml(book.title)} cover" src="${url}" loading="lazy" decoding="async" />`
-      : `<div class="placeholder">${escapeHtml(book.title.slice(0, 60))}</div>`;
+      : `<div class="placeholder">${escapeHtml(book.title.slice(0, 60))}</div>`
+    ) + formatBadge;
     if (wide) {
       wrap.innerHTML = `
         <div class="row">
@@ -305,7 +384,7 @@
             <h4>${escapeHtml(book.title)}</h4>
             <p>${escapeHtml(book.author || "Unknown author")}</p>
             <div class="row-bottom">
-              <div class="stats"><span>${pct}%</span><span>${tot ? `${Math.max(0, tot - cur)} pages left` : "—"}</span></div>
+              <div class="stats"><span>${pct}%</span><span>${tot ? `${Math.max(0, tot - cur)} ${book.format === 'epub' ? 'locations' : 'pages'} left` : "—"}</span></div>
               <div class="progress-line"><div style="width:${pct}%"></div></div>
             </div>
           </div>
@@ -320,9 +399,16 @@
     wrap.addEventListener("click", () => navigate("#/reader/" + encodeURIComponent(book.id)));
     return wrap;
   }
-  function escapeHtml(s = "") {
-    return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" }[c]));
+
+  // ---------- Library ----------
+  function bookProgress(b) {
+    if (!b.pageCount || b.pageCount < 1) return 0;
+    return Math.min(1, (b.lastPage || 0) / b.pageCount);
   }
+  function isFinished(b) {
+    return b.finishedAt || (b.pageCount > 0 && (b.lastPage || 0) >= b.pageCount);
+  }
+  function isStarted(b) { return (b.lastPage || 0) > 0 && !isFinished(b); }
 
   async function renderLibrary() {
     mountTemplate("tpl-library");
@@ -338,7 +424,7 @@
     if (!books.length) {
       empty.classList.remove("hidden");
       empty.querySelector('[data-act="empty-import"]').addEventListener("click", () => $("#pdfInput").click());
-      root.querySelector("[data-subgreet]").textContent = "Add your first PDF to get started.";
+      root.querySelector("[data-subgreet]").textContent = "Add your first book to get started.";
       return;
     }
     empty.classList.add("hidden");
@@ -347,13 +433,10 @@
 
     const readingNow = books.filter(isStarted);
     const finished = books.filter(isFinished);
-    const all = books;
-
     fillSection(root.querySelector('[data-section="reading-now"]'), readingNow, { wide: true });
-    fillSection(root.querySelector('[data-section="all-books"]'), all, { wide: false });
+    fillSection(root.querySelector('[data-section="all-books"]'), books, { wide: false });
     fillSection(root.querySelector('[data-section="finished"]'), finished, { wide: false });
   }
-
   function fillSection(section, list, opts) {
     if (!list.length) { section.classList.add("hidden"); return; }
     section.classList.remove("hidden");
@@ -361,21 +444,17 @@
     track.innerHTML = "";
     for (const b of list) track.appendChild(makeCard(b, opts));
     section.querySelector("[data-count]").textContent = `${list.length} book${list.length === 1 ? "" : "s"}`;
-    const scrub = section.querySelector(".slider-scrub");
-    bindRangeFill(scrub);
+    bindRangeFill(section.querySelector(".slider-scrub"));
     bindSlider(section.querySelector("[data-slider-host]"));
   }
 
   // ---------- Progress ----------
   function startOfDay(d = new Date()) { const x = new Date(d); x.setHours(0,0,0,0); return x; }
   function daysAgo(n) { const d = startOfDay(); d.setDate(d.getDate() - n); return d; }
-
   async function renderProgress() {
     mountTemplate("tpl-progress");
     const root = $("#viewRoot");
-
     const [books, sessions] = await Promise.all([idb.all("books"), idb.all("sessions")]);
-    const now = Date.now();
     const todayStart = startOfDay().getTime();
     const weekStart = daysAgo(6).getTime();
 
@@ -386,7 +465,6 @@
     const msWeek = sessions.filter(s => s.endAt >= weekStart).reduce((a, s) => a + (s.durationMs || 0), 0);
     const inprogress = books.filter(isStarted);
 
-    // Streak: consecutive days back from today (or yesterday if nothing today yet) with at least 1 page read
     const dayKeysWithReading = new Set(
       sessions.filter(s => (s.pagesRead || 0) > 0).map(s => fmt.dateKey(s.endAt))
     );
@@ -397,20 +475,17 @@
       else break;
     }
 
-    // Metrics
-    setMetric(root, "books", books.length, books.length ? `on your shelf` : "import your first PDF");
+    setMetric(root, "books", books.length, books.length ? "on your shelf" : "import your first book");
     setMetric(root, "inprogress", inprogress.length, inprogress.length ? "actively reading" : "none in progress");
     setMetric(root, "pagesToday", pagesToday, pagesToday ? "keep going" : "no pages yet today");
     setMetric(root, "streak", streak, streak === 1 ? "day" : "days");
-    setMetric(root, "pagesWeek", pagesWeek, `last 7 days`);
+    setMetric(root, "pagesWeek", pagesWeek, "last 7 days");
     setMetric(root, "timeToday", fmt.mins(msToday), msToday ? "active today" : "no time logged");
     setMetric(root, "timeWeek", fmt.mins(msWeek), "last 7 days");
-    setMetric(root, "pagesTotal", pagesTotal, "all-time pages read");
+    setMetric(root, "pagesTotal", pagesTotal, "all-time");
 
-    // Week chart
     renderWeekChart(root, sessions);
 
-    // Per-book progress slider
     const host = root.querySelector("#progressSliderHost");
     const track = root.querySelector("#progressSliderTrack");
     const inProgList = books.filter(isStarted).sort((a, b) => (b.lastReadAt || 0) - (a.lastReadAt || 0));
@@ -464,43 +539,57 @@
   async function renderSettings() {
     mountTemplate("tpl-settings");
     const root = $("#viewRoot");
-    const prefs = await loadPrefs();
-    cachedPrefs = prefs;
+    cachedPrefs = await loadPrefs();
 
-    const setUp = (id, key, format) => {
-      const input = root.querySelector("#" + id);
-      const lbl = root.querySelector(`[data-val="${id}"]`);
-      input.value = prefs[key];
-      const refresh = () => {
-        lbl.textContent = format(parseFloat(input.value));
-        input.style.setProperty("--p", ((input.value - input.min) / (input.max - input.min) * 100) + "%");
-      };
-      input.addEventListener("input", () => {
-        cachedPrefs[key] = parseFloat(input.value);
-        applyPrefsToCSS();
-        refresh();
+    // Theme pickers
+    $$("[data-theme-pick]", root).forEach((b) => {
+      b.classList.toggle("is-active", b.dataset.themePick === cachedPrefs.theme);
+      b.addEventListener("click", () => {
+        cachedPrefs.theme = b.dataset.themePick;
+        applyTheme(cachedPrefs.theme);
+        setPref("theme", cachedPrefs.theme);
+        $$("[data-theme-pick]").forEach((x) => x.classList.toggle("is-active", x.dataset.themePick === cachedPrefs.theme));
       });
-      input.addEventListener("change", () => setPref(key, parseFloat(input.value)));
-      refresh();
-    };
-    setUp("prefPageWidth", "pageWidth", (v) => v + "px");
+    });
 
+    // Page width
+    const pw = root.querySelector("#prefPageWidth");
+    const pwLbl = root.querySelector('[data-val="prefPageWidth"]');
+    if (pw) {
+      pw.value = cachedPrefs.pageWidth;
+      const refresh = () => {
+        pwLbl.textContent = pw.value + "px";
+        pw.style.setProperty("--p", ((pw.value - pw.min) / (pw.max - pw.min) * 100) + "%");
+      };
+      pw.addEventListener("input", () => { cachedPrefs.pageWidth = parseFloat(pw.value); refresh(); });
+      pw.addEventListener("change", () => setPref("pageWidth", parseFloat(pw.value)));
+      refresh();
+    }
+
+    // Backup / restore / update buttons
+    root.querySelector("#exportBtn").addEventListener("click", exportLibrary);
+    root.querySelector("#importBtn").addEventListener("click", () => $("#restoreInput").click());
+    root.querySelector("#checkUpdateBtn").addEventListener("click", () => {
+      if (window.__cozyCheckUpdate) window.__cozyCheckUpdate();
+      else window.location.reload();
+    });
+
+    // Reset / wipe
     root.querySelector("#resetSessions").addEventListener("click", async () => {
       if (!confirm("Reset all reading metrics? Books stay; sessions get cleared.")) return;
       await idb.clear("sessions");
-      // Also reset lastPage so progress goes to zero? No — keep lastPage so user can resume.
       toast("Metrics reset.");
     });
     root.querySelector("#wipeAll").addEventListener("click", async () => {
       if (!confirm("Delete ALL books and reading data? This cannot be undone.")) return;
-      await Promise.all(["books", "sessions", "prefs"].map((s) => idb.clear(s)));
+      await Promise.all(["books", "files", "sessions", "prefs", "highlights"].map((s) => idb.clear(s)));
       cachedPrefs = { ...PREF_DEFAULTS };
-      applyPrefsToCSS();
+      applyTheme(cachedPrefs.theme);
       toast("All data deleted.");
       navigate("#/library");
     });
 
-    // Storage info
+    // Storage usage
     if (navigator.storage && navigator.storage.estimate) {
       try {
         const est = await navigator.storage.estimate();
@@ -523,32 +612,72 @@
     root.querySelector("[data-reader-title]").textContent = book.title;
     root.querySelector("[data-reader-meta]").textContent = book.author || "Unknown author";
 
-    const canvas = root.querySelector("#pdfCanvas");
+    // Fetch file blob
+    let fileBlob = null;
+    try {
+      const rec = await idb.get("files", bookId);
+      fileBlob = rec ? rec.blob : (book.fileBlob || null);
+    } catch { fileBlob = book.fileBlob || null; }
+    if (!fileBlob) { toast("File missing. Re-import the book."); navigate("#/library"); return; }
+
+    const format = book.format || "pdf";
+    readerState = {
+      book, format,
+      session: { startAt: Date.now(), startTickLoc: 0, lastTickLoc: 0 },
+    };
+
+    if (format === "epub") {
+      await openEpubReader(root, book, fileBlob);
+    } else {
+      await openPdfReader(root, book, fileBlob);
+    }
+  }
+
+  // ----- PDF reader -----
+  async function openPdfReader(root, book, fileBlob) {
     const stage = root.querySelector("#pdfStage");
+    const epubStage = root.querySelector("#epubStage");
+    stage.classList.remove("hidden");
+    epubStage.classList.add("hidden");
+    // Hide EPUB-only stuff in controls
+    $$("[data-pdf-only]", root).forEach((el) => el.classList.remove("hidden"));
+
+    const canvas = root.querySelector("#pdfCanvas");
+    const pan = root.querySelector("#pdfPan");
+    const textLayer = root.querySelector("#pdfTextLayer");
     const pageSlider = root.querySelector("#pageSlider");
     const pageCur = root.querySelector("[data-page-cur]");
     const pageTot = root.querySelector("[data-page-tot]");
+    const zoomLabel = root.querySelector("[data-zoom-label]");
+    const fsIcon = root.querySelector("[data-fs-icon]");
 
     let pdf;
     try {
-      pdf = await loadPdfFromBlob(book.fileBlob);
+      pdf = await loadPdfFromBlob(fileBlob);
     } catch (e) {
-      toast("Could not open this PDF.");
       console.error(e);
-      navigate("#/library");
-      return;
+      try {
+        const buf = await fileBlob.arrayBuffer();
+        const fresh = new Blob([buf], { type: "application/pdf" });
+        pdf = await loadPdfFromBlob(fresh);
+        await idb.put("files", { id: book.id, blob: fresh });
+      } catch (e2) {
+        console.error("retry failed", e2);
+        toast("Could not open this PDF.");
+        navigate("#/library");
+        return;
+      }
     }
 
-    // Initialize per-book state
     const initialPage = Math.min(Math.max(1, book.lastPage || 1), pdf.numPages);
-    readerState = {
-      book, pdf,
-      currentPage: initialPage,
-      pageCount: pdf.numPages,
-      session: { startAt: Date.now(), startPage: initialPage, lastTickPage: initialPage },
-      rendering: false,
-      pendingPage: null,
-    };
+    readerState.pdf = pdf;
+    readerState.currentPage = initialPage;
+    readerState.pageCount = pdf.numPages;
+    readerState.zoom = 1;
+    readerState.rendering = false;
+    readerState.pendingPage = null;
+    readerState.session.startTickLoc = initialPage;
+    readerState.session.lastTickLoc = initialPage;
 
     pageSlider.min = 1;
     pageSlider.max = pdf.numPages;
@@ -556,17 +685,23 @@
     bindRangeFill(pageSlider);
     pageTot.textContent = pdf.numPages;
 
+    function fitWidth() { return Math.min(stage.clientWidth - 8, cachedPrefs.pageWidth); }
+
     async function showPage(n) {
       n = Math.min(Math.max(1, n | 0), readerState.pageCount);
       if (readerState.rendering) { readerState.pendingPage = n; return; }
       readerState.rendering = true;
       try {
-        const w = Math.min(stage.clientWidth - 8, cachedPrefs.pageWidth);
-        await renderPageToCanvas(readerState.pdf, n, canvas, w);
+        const cssWidth = Math.max(120, fitWidth() * readerState.zoom);
+        const { page, viewport, cssScale } = await renderPageToCanvas(readerState.pdf, n, canvas, cssWidth);
+        await renderPdfTextLayer(page, viewport, textLayer, cssScale);
+        const pageChanged = readerState.currentPage !== n;
         readerState.currentPage = n;
+        readerState.session.lastTickLoc = n;
         pageCur.textContent = n;
         pageSlider.value = n;
         pageSlider.style.setProperty("--p", ((n - 1) / Math.max(1, readerState.pageCount - 1) * 100) + "%");
+        if (pageChanged) { stage.scrollTop = 0; stage.scrollLeft = 0; }
       } finally {
         readerState.rendering = false;
         if (readerState.pendingPage != null) {
@@ -575,9 +710,30 @@
         }
       }
     }
-    await showPage(initialPage);
+    function updateZoomLabel() { if (zoomLabel) zoomLabel.textContent = Math.round(readerState.zoom * 100) + "%"; }
+    async function setZoom(z) {
+      z = Math.max(0.5, Math.min(4, z));
+      if (Math.abs(z - readerState.zoom) < 0.005) return;
+      readerState.zoom = z;
+      updateZoomLabel();
+      await showPage(readerState.currentPage);
+    }
+    function toggleImmersive(force) {
+      const on = force !== undefined ? force : !document.body.classList.contains("is-immersive");
+      document.body.classList.toggle("is-immersive", on);
+      if (fsIcon) fsIcon.textContent = on ? "fullscreen_exit" : "fullscreen";
+      try {
+        if (on && document.documentElement.requestFullscreen && !document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {});
+        else if (!on && document.fullscreenElement) document.exitFullscreen().catch(() => {});
+      } catch {}
+      requestAnimationFrame(() => showPage(readerState.currentPage));
+    }
 
-    // Bookmark icon reflects "started"
+    await showPage(initialPage);
+    updateZoomLabel();
+    applyBrightness(cachedPrefs.brightness);
+
+    // Bookmark
     const bmIcon = root.querySelector("[data-bookmark-icon]");
     function refreshBookmark() {
       const fav = !!book.bookmarked;
@@ -587,11 +743,11 @@
     refreshBookmark();
     root.querySelector('[data-act="bookmark"]').addEventListener("click", async () => {
       book.bookmarked = !book.bookmarked;
-      await idb.put("books", book);
+      await persistReaderProgress();
       refreshBookmark();
     });
 
-    // Page nav
+    // Nav buttons + slider
     root.querySelector('[data-act="prev"]').addEventListener("click", () => showPage(readerState.currentPage - 1));
     root.querySelector('[data-act="next"]').addEventListener("click", () => showPage(readerState.currentPage + 1));
     pageSlider.addEventListener("input", () => {
@@ -600,75 +756,428 @@
     });
     pageSlider.addEventListener("change", () => showPage(parseInt(pageSlider.value, 10)));
 
-    // Keyboard
+    // Zoom + fullscreen + options
+    root.querySelector('[data-act="zoom-in"]').addEventListener("click", () => setZoom(readerState.zoom * 1.25));
+    root.querySelector('[data-act="zoom-out"]').addEventListener("click", () => setZoom(readerState.zoom / 1.25));
+    root.querySelector('[data-act="zoom-reset"]').addEventListener("click", () => setZoom(1));
+    root.querySelector('[data-act="fit-width"]').addEventListener("click", () => setZoom(1));
+    root.querySelector('[data-act="fullscreen"]').addEventListener("click", () => toggleImmersive());
+    root.querySelector('[data-act="exit-fullscreen"]').addEventListener("click", () => toggleImmersive(false));
+    root.querySelector('[data-act="options"]').addEventListener("click", () => openOptionsSheet("pdf"));
+
     function onKey(e) {
       if (e.key === "ArrowRight" || e.key === "PageDown") { e.preventDefault(); showPage(readerState.currentPage + 1); }
       else if (e.key === "ArrowLeft" || e.key === "PageUp") { e.preventDefault(); showPage(readerState.currentPage - 1); }
+      else if (e.key === "+" || e.key === "=") { e.preventDefault(); setZoom(readerState.zoom * 1.25); }
+      else if (e.key === "-" || e.key === "_") { e.preventDefault(); setZoom(readerState.zoom / 1.25); }
+      else if (e.key === "0") { e.preventDefault(); setZoom(1); }
+      else if (e.key === "f" || e.key === "F") { e.preventDefault(); toggleImmersive(); }
+      else if (e.key === "Escape" && document.body.classList.contains("is-immersive")) toggleImmersive(false);
     }
     document.addEventListener("keydown", onKey);
 
-    // Swipe (touch) to flip pages
-    let tStart = null;
-    stage.addEventListener("touchstart", (e) => {
-      if (e.touches.length !== 1) return;
-      tStart = { x: e.touches[0].clientX, y: e.touches[0].clientY, t: Date.now() };
-    }, { passive: true });
-    stage.addEventListener("touchend", (e) => {
-      if (!tStart) return;
+    // Touch (swipe + pinch). Skip when target is inside text layer (user is selecting).
+    function dist(a, b) { return Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY); }
+    let touchStart = null;
+    let pinchStart = null;
+    function onTouchStart(e) {
+      if (e.target && e.target.closest(".textLayer")) return; // let native selection win
+      if (e.touches.length === 2) {
+        touchStart = null;
+        pinchStart = { d: dist(e.touches[0], e.touches[1]), zoom: readerState.zoom, pending: readerState.zoom };
+        pan.style.transformOrigin = "top left";
+      } else if (e.touches.length === 1 && !pinchStart) {
+        touchStart = {
+          x: e.touches[0].clientX, y: e.touches[0].clientY, t: Date.now(),
+          sl: stage.scrollLeft, st: stage.scrollTop,
+        };
+      }
+    }
+    function onTouchMove(e) {
+      if (pinchStart && e.touches.length === 2) {
+        if (e.cancelable) e.preventDefault();
+        const d = dist(e.touches[0], e.touches[1]);
+        const k = d / pinchStart.d;
+        const newZoom = Math.max(0.5, Math.min(4, pinchStart.zoom * k));
+        pinchStart.pending = newZoom;
+        pan.style.transform = `scale(${newZoom / readerState.zoom})`;
+      }
+    }
+    function onTouchEnd(e) {
+      if (pinchStart && e.touches.length < 2) {
+        const target = pinchStart.pending;
+        pan.style.transform = "";
+        pinchStart = null;
+        setZoom(target);
+        return;
+      }
+      if (!touchStart) return;
+      const ts = touchStart; touchStart = null;
+      if (Math.abs(stage.scrollLeft - ts.sl) > 4 || Math.abs(stage.scrollTop - ts.st) > 4) return;
+      if (readerState.zoom > 1.01) return;
       const t = e.changedTouches[0];
-      const dx = t.clientX - tStart.x, dy = t.clientY - tStart.y, dt = Date.now() - tStart.t;
-      tStart = null;
+      const dx = t.clientX - ts.x, dy = t.clientY - ts.y, dt = Date.now() - ts.t;
       if (dt > 600) return;
       if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
       if (dx < 0) showPage(readerState.currentPage + 1);
       else showPage(readerState.currentPage - 1);
-    }, { passive: true });
+    }
+    stage.addEventListener("touchstart", onTouchStart, { passive: true });
+    stage.addEventListener("touchmove", onTouchMove, { passive: false });
+    stage.addEventListener("touchend", onTouchEnd, { passive: true });
+    stage.addEventListener("touchcancel", onTouchEnd, { passive: true });
 
-    // Re-render on resize
+    function onWheel(e) {
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+        setZoom(readerState.zoom * (e.deltaY < 0 ? 1.1 : 1 / 1.1));
+      }
+    }
+    stage.addEventListener("wheel", onWheel, { passive: false });
+
     const ro = new ResizeObserver(() => showPage(readerState.currentPage));
     ro.observe(stage);
 
-    // Persist current page periodically + record session on leave
     const saveTimer = setInterval(() => persistReaderProgress(), 4000);
     const onVis = () => { if (document.visibilityState === "hidden") persistReaderProgress(); };
     document.addEventListener("visibilitychange", onVis);
     const onUnload = () => { try { persistReaderProgress(); } catch {} };
     window.addEventListener("beforeunload", onUnload);
 
-    // Hand cleanup to the router
+    viewCleanup = async () => {
+      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("visibilitychange", onVis);
+      window.removeEventListener("beforeunload", onUnload);
+      stage.removeEventListener("touchstart", onTouchStart);
+      stage.removeEventListener("touchmove", onTouchMove);
+      stage.removeEventListener("touchend", onTouchEnd);
+      stage.removeEventListener("touchcancel", onTouchEnd);
+      stage.removeEventListener("wheel", onWheel);
+      clearInterval(saveTimer);
+      ro.disconnect();
+      document.body.classList.remove("is-immersive");
+      if (document.fullscreenElement) { try { await document.exitFullscreen(); } catch {} }
+      const pdfRef = readerState && readerState.pdf;
+      await finalizeSession();
+      if (pdfRef) { try { await pdfRef.destroy(); } catch {} }
+    };
+  }
+
+  // ----- EPUB reader -----
+  async function openEpubReader(root, book, fileBlob) {
+    const stage = root.querySelector("#epubStage");
+    const pdfStage = root.querySelector("#pdfStage");
+    pdfStage.classList.add("hidden");
+    stage.classList.remove("hidden");
+    $$("[data-pdf-only]", root).forEach((el) => el.classList.add("hidden"));
+
+    const pageSlider = root.querySelector("#pageSlider");
+    const pageCur = root.querySelector("[data-page-cur]");
+    const pageTot = root.querySelector("[data-page-tot]");
+    const fsIcon = root.querySelector("[data-fs-icon]");
+
+    let epub;
+    try {
+      epub = await openEpubFromBlob(fileBlob);
+    } catch (e) {
+      console.error(e);
+      toast("Could not open this EPUB.");
+      navigate("#/library");
+      return;
+    }
+
+    // Mount rendition
+    stage.innerHTML = "";
+    const rendition = epub.renderTo(stage, {
+      width: stage.clientWidth || 600,
+      height: stage.clientHeight || 800,
+      flow: "paginated",
+      spread: "none",
+      manager: "default",
+      allowScriptedContent: false,
+    });
+
+    readerState.book = book;
+    readerState.epub = epub;
+    readerState.rendition = rendition;
+    readerState.format = "epub";
+    readerState.currentCfi = book.lastCfi || null;
+    readerState.pageCount = 0;
+    readerState.currentPage = 0;
+
+    // Display first / saved location
+    try {
+      await rendition.display(book.lastCfi || undefined);
+    } catch (e) {
+      console.error(e);
+      try { await rendition.display(); } catch {}
+    }
+
+    // Generate / restore locations for page mapping
+    (async () => {
+      try {
+        if (book.epubLocations) {
+          await epub.locations.load(book.epubLocations);
+        } else {
+          await epub.locations.generate(1024);
+          // Save for next time
+          try {
+            const json = epub.locations.save();
+            const stored = (await idb.get("books", book.id)) || book;
+            stored.epubLocations = json;
+            if (stored.fileBlob) delete stored.fileBlob;
+            await idb.put("books", stored);
+          } catch {}
+        }
+        readerState.pageCount = epub.locations.total || 0;
+        pageSlider.max = Math.max(1, readerState.pageCount);
+        pageTot.textContent = String(readerState.pageCount || 0);
+        // Sync current
+        if (readerState.currentCfi) {
+          const idx = epub.locations.locationFromCfi(readerState.currentCfi);
+          if (idx != null) {
+            readerState.currentPage = idx;
+            pageSlider.value = idx;
+            pageCur.textContent = String(idx);
+            pageSlider.style.setProperty("--p", (idx / Math.max(1, readerState.pageCount - 1) * 100) + "%");
+          }
+        }
+        // Persist initial state into session start
+        readerState.session.startTickLoc = readerState.currentPage;
+        readerState.session.lastTickLoc = readerState.currentPage;
+      } catch (e) { console.warn("locations failed", e); }
+    })();
+
+    bindRangeFill(pageSlider);
+
+    rendition.on("relocated", (location) => {
+      readerState.currentCfi = location.start.cfi;
+      if (epub.locations && epub.locations.total) {
+        const idx = epub.locations.locationFromCfi(location.start.cfi) || 0;
+        readerState.currentPage = idx;
+        readerState.session.lastTickLoc = idx;
+        pageSlider.max = Math.max(1, epub.locations.total);
+        pageSlider.value = idx;
+        pageCur.textContent = String(idx);
+        pageTot.textContent = String(epub.locations.total);
+        pageSlider.style.setProperty("--p", (idx / Math.max(1, epub.locations.total - 1) * 100) + "%");
+        readerState.pageCount = epub.locations.total;
+      }
+      if (location.atEnd) { book.finishedAt = book.finishedAt || Date.now(); }
+    });
+
+    // Apply theme + font + brightness
+    applyEpubReaderStyles();
+    applyBrightness(cachedPrefs.brightness);
+
+    // Restore highlights
+    try {
+      const highlights = await idb.allByIndex("highlights", "bookId", book.id);
+      for (const h of highlights) {
+        try { rendition.annotations.add("highlight", h.cfi, { id: h.id }, null, "cozy-hl", { fill: "rgba(255,196,0,0.35)" }); } catch {}
+      }
+    } catch {}
+
+    // Bookmark
+    const bmIcon = root.querySelector("[data-bookmark-icon]");
+    function refreshBookmark() {
+      const fav = !!book.bookmarked;
+      bmIcon.textContent = fav ? "bookmark" : "bookmark_border";
+      bmIcon.style.fontVariationSettings = `'FILL' ${fav ? 1 : 0}`;
+    }
+    refreshBookmark();
+    root.querySelector('[data-act="bookmark"]').addEventListener("click", async () => {
+      book.bookmarked = !book.bookmarked;
+      await persistReaderProgress();
+      refreshBookmark();
+    });
+
+    // Page nav
+    root.querySelector('[data-act="prev"]').addEventListener("click", () => rendition.prev());
+    root.querySelector('[data-act="next"]').addEventListener("click", () => rendition.next());
+    pageSlider.addEventListener("input", () => {
+      pageCur.textContent = pageSlider.value;
+      pageSlider.style.setProperty("--p", (pageSlider.value / Math.max(1, pageSlider.max - 1) * 100) + "%");
+    });
+    pageSlider.addEventListener("change", () => {
+      const idx = parseInt(pageSlider.value, 10);
+      if (epub.locations && epub.locations.total) {
+        const cfi = epub.locations.cfiFromLocation(idx);
+        if (cfi) rendition.display(cfi);
+      }
+    });
+
+    // Fullscreen
+    function toggleImmersive(force) {
+      const on = force !== undefined ? force : !document.body.classList.contains("is-immersive");
+      document.body.classList.toggle("is-immersive", on);
+      if (fsIcon) fsIcon.textContent = on ? "fullscreen_exit" : "fullscreen";
+      try {
+        if (on && document.documentElement.requestFullscreen && !document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {});
+        else if (!on && document.fullscreenElement) document.exitFullscreen().catch(() => {});
+      } catch {}
+      // Resize rendition shortly after layout settles
+      setTimeout(() => { try { rendition.resize(stage.clientWidth, stage.clientHeight); } catch {} }, 250);
+    }
+    root.querySelector('[data-act="fullscreen"]').addEventListener("click", () => toggleImmersive());
+    root.querySelector('[data-act="exit-fullscreen"]').addEventListener("click", () => toggleImmersive(false));
+    root.querySelector('[data-act="options"]').addEventListener("click", () => openOptionsSheet("epub"));
+
+    // Keyboard
+    function onKey(e) {
+      if (e.key === "ArrowRight" || e.key === "PageDown") { e.preventDefault(); rendition.next(); }
+      else if (e.key === "ArrowLeft" || e.key === "PageUp") { e.preventDefault(); rendition.prev(); }
+      else if (e.key === "f" || e.key === "F") { e.preventDefault(); toggleImmersive(); }
+      else if (e.key === "Escape" && document.body.classList.contains("is-immersive")) toggleImmersive(false);
+    }
+    document.addEventListener("keydown", onKey);
+
+    // Selection / Highlight
+    const selAction = root.querySelector("#selectionAction");
+    let activeSelection = null;
+    rendition.on("selected", (cfiRange, contents) => {
+      try {
+        const range = contents.range(cfiRange);
+        if (!range) return;
+        const rect = range.getBoundingClientRect();
+        const frameRect = stage.getBoundingClientRect();
+        // Position the action bar near the selection inside the reader frame
+        selAction.classList.remove("hidden");
+        const left = Math.max(8, Math.min(stage.clientWidth - 220, rect.left - frameRect.left));
+        const top = Math.max(8, rect.top - frameRect.top - 44);
+        selAction.style.left = left + "px";
+        selAction.style.top = top + "px";
+        activeSelection = { cfi: cfiRange };
+      } catch (e) { console.warn(e); }
+    });
+    rendition.on("relocated", () => { selAction.classList.add("hidden"); activeSelection = null; });
+    selAction.querySelector('[data-act="cancel-sel"]').addEventListener("click", () => {
+      selAction.classList.add("hidden"); activeSelection = null;
+    });
+    selAction.querySelector('[data-act="highlight"]').addEventListener("click", async () => {
+      if (!activeSelection) return;
+      const cfi = activeSelection.cfi;
+      const id = "hl_" + book.id + "_" + (await hashString(cfi));
+      try { rendition.annotations.add("highlight", cfi, { id }, null, "cozy-hl", { fill: "rgba(255,196,0,0.35)" }); } catch {}
+      await idb.put("highlights", { id, bookId: book.id, cfi, color: "yellow", createdAt: Date.now() });
+      selAction.classList.add("hidden");
+      activeSelection = null;
+    });
+    selAction.querySelector('[data-act="unhighlight"]').addEventListener("click", async () => {
+      if (!activeSelection) return;
+      const cfi = activeSelection.cfi;
+      const id = "hl_" + book.id + "_" + (await hashString(cfi));
+      try { rendition.annotations.remove(cfi, "highlight"); } catch {}
+      await idb.del("highlights", id);
+      selAction.classList.add("hidden");
+      activeSelection = null;
+    });
+
+    // Resize handling
+    const ro = new ResizeObserver(() => {
+      try { rendition.resize(stage.clientWidth, stage.clientHeight); } catch {}
+    });
+    ro.observe(stage);
+
+    const saveTimer = setInterval(() => persistReaderProgress(), 4000);
+    const onVis = () => { if (document.visibilityState === "hidden") persistReaderProgress(); };
+    document.addEventListener("visibilitychange", onVis);
+    const onUnload = () => { try { persistReaderProgress(); } catch {} };
+    window.addEventListener("beforeunload", onUnload);
+
     viewCleanup = async () => {
       document.removeEventListener("keydown", onKey);
       document.removeEventListener("visibilitychange", onVis);
       window.removeEventListener("beforeunload", onUnload);
       clearInterval(saveTimer);
       ro.disconnect();
+      document.body.classList.remove("is-immersive");
+      if (document.fullscreenElement) { try { await document.exitFullscreen(); } catch {} }
+      try { rendition.destroy(); } catch {}
+      try { epub.destroy(); } catch {}
       await finalizeSession();
     };
   }
 
+  function applyEpubReaderStyles() {
+    if (!readerState || !readerState.rendition) return;
+    const theme = cachedPrefs.theme;
+    const surfaces = {
+      light: { bg: "#fbf9f4", fg: "#1b1c19", link: "#8d4b00", selBg: "#ffdcc3" },
+      sepia: { bg: "#f3e8d2", fg: "#3b2a18", link: "#8d4b00", selBg: "#ffdcc3" },
+      dark:  { bg: "#14130e", fg: "#ece1d2", link: "#ffb77d", selBg: "#6e3900" },
+    };
+    const s = surfaces[theme] || surfaces.light;
+    const ff = (cachedPrefs.fontFamily || "Literata") + ", serif";
+    const lh = (cachedPrefs.lineHeight / 10).toFixed(2);
+    const rules = {
+      "body": {
+        "background": s.bg + " !important",
+        "color": s.fg + " !important",
+        "font-family": ff + " !important",
+        "line-height": lh + " !important",
+        "padding": cachedPrefs.margin + "px !important",
+      },
+      "p, div, span, li, blockquote": {
+        "color": s.fg + " !important",
+        "font-family": ff + " !important",
+        "line-height": lh + " !important",
+      },
+      "a, a *": { "color": s.link + " !important" },
+      "::selection": { "background": s.selBg + " !important" },
+    };
+    try {
+      // register+select re-applies cleanly on every call (default() can be sticky)
+      readerState.rendition.themes.register("cozy", rules);
+      readerState.rendition.themes.select("cozy");
+      readerState.rendition.themes.fontSize(cachedPrefs.fontSize + "px");
+    } catch (e) { console.warn(e); }
+  }
+
+  async function hashString(s) {
+    const enc = new TextEncoder().encode(s);
+    const buf = await crypto.subtle.digest("SHA-1", enc);
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("").slice(0, 16);
+  }
+
   async function persistReaderProgress() {
     if (!readerState) return;
-    const { book, currentPage, pageCount } = readerState;
-    book.lastPage = currentPage;
-    book.pageCount = pageCount;
-    book.lastReadAt = Date.now();
-    if (currentPage >= pageCount) book.finishedAt = book.finishedAt || Date.now();
-    await idb.put("books", book);
+    const { book } = readerState;
+    const stored = (await idb.get("books", book.id)) || book;
+    if (readerState.format === "pdf") {
+      stored.lastPage = readerState.currentPage;
+      stored.pageCount = readerState.pageCount;
+      if (stored.lastPage >= stored.pageCount && stored.pageCount > 0)
+        stored.finishedAt = stored.finishedAt || Date.now();
+    } else if (readerState.format === "epub") {
+      stored.lastCfi = readerState.currentCfi || stored.lastCfi;
+      stored.lastPage = readerState.currentPage || stored.lastPage || 0;
+      stored.pageCount = readerState.pageCount || stored.pageCount || 0;
+      if (stored.pageCount && stored.lastPage >= stored.pageCount)
+        stored.finishedAt = stored.finishedAt || Date.now();
+      if (readerState.epub && readerState.epub.locations && readerState.epub.locations.total && !stored.epubLocations) {
+        try { stored.epubLocations = readerState.epub.locations.save(); } catch {}
+      }
+    }
+    stored.lastReadAt = Date.now();
+    stored.bookmarked = book.bookmarked;
+    if (stored.fileBlob) delete stored.fileBlob;
+    await idb.put("books", stored);
   }
 
   async function finalizeSession() {
     if (!readerState) return;
-    const { book, session, currentPage } = readerState;
+    const { book, session } = readerState;
     const endAt = Date.now();
     const durationMs = endAt - session.startAt;
-    const pagesRead = Math.max(0, currentPage - session.startPage);
+    const pagesRead = Math.max(0, (readerState.session.lastTickLoc || 0) - (readerState.session.startTickLoc || 0));
     if (durationMs > 5000 || pagesRead > 0) {
       await idb.put("sessions", {
         bookId: book.id,
         startAt: session.startAt,
         endAt,
-        startPage: session.startPage,
-        endPage: currentPage,
+        startPage: session.startTickLoc || 0,
+        endPage: session.lastTickLoc || 0,
         pagesRead,
         durationMs,
       });
@@ -677,38 +1186,106 @@
     readerState = null;
   }
 
+  // ---------- Options sheet ----------
+  function openOptionsSheet(format) {
+    const sheet = document.getElementById("optionsSheet");
+    const backdrop = document.getElementById("optionsBackdrop");
+    if (!sheet) return;
+    // Toggle epub-only / pdf-only visibility within sheet
+    sheet.querySelectorAll("[data-epub-only]").forEach((el) => el.classList.toggle("hidden", format !== "epub"));
+    sheet.querySelectorAll("[data-pdf-only]").forEach((el) => el.classList.toggle("hidden", format !== "pdf"));
+    // Theme pick state
+    sheet.querySelectorAll("[data-theme-pick]").forEach((b) => b.classList.toggle("is-active", b.dataset.themePick === cachedPrefs.theme));
+    sheet.querySelectorAll("[data-font-pick]").forEach((b) => b.classList.toggle("is-active", b.dataset.fontPick === cachedPrefs.fontFamily));
+    // Sliders
+    bindPrefSlider(sheet, "#prefBrightness", "brightness", (v) => v + "%", { onChange: applyBrightness });
+    bindPrefSlider(sheet, "#prefFontSize", "fontSize", (v) => v + "px", { onChange: applyEpubReaderStyles });
+    bindPrefSlider(sheet, "#prefLineHeight", "lineHeight", (v) => (v / 10).toFixed(1), { onChange: applyEpubReaderStyles });
+    bindPrefSlider(sheet, "#prefMargin", "margin", (v) => v + "px", { onChange: applyEpubReaderStyles });
+    backdrop.classList.remove("hidden");
+    sheet.classList.remove("hidden", "is-closing");
+  }
+  function closeOptionsSheet() {
+    const sheet = document.getElementById("optionsSheet");
+    const backdrop = document.getElementById("optionsBackdrop");
+    if (!sheet) return;
+    sheet.classList.add("is-closing");
+    backdrop.classList.add("hidden");
+    setTimeout(() => sheet.classList.add("hidden"), 200);
+  }
+  function bindPrefSlider(root, sel, key, format, opts) {
+    const input = root.querySelector(sel);
+    if (!input) return;
+    const lbl = root.querySelector(`[data-val="${input.id}"]`);
+    input.value = cachedPrefs[key];
+    const refresh = () => {
+      if (lbl) lbl.textContent = format(parseFloat(input.value));
+      input.style.setProperty("--p", ((input.value - input.min) / (input.max - input.min) * 100) + "%");
+    };
+    input.oninput = () => {
+      cachedPrefs[key] = parseFloat(input.value);
+      refresh();
+      if (opts && opts.onChange) opts.onChange(cachedPrefs[key]);
+    };
+    input.onchange = () => setPref(key, parseFloat(input.value));
+    refresh();
+  }
+
   // ---------- Import ----------
+  function detectFormat(file) {
+    const n = (file.name || "").toLowerCase();
+    if (n.endsWith(".epub") || file.type === "application/epub+zip") return "epub";
+    if (n.endsWith(".pdf") || file.type === "application/pdf") return "pdf";
+    return null;
+  }
   async function handleFiles(files) {
     if (!files || !files.length) return;
-    await waitFor(() => !!window.pdfjsLib);
     let added = 0;
     for (const file of files) {
-      if (file.type && file.type !== "application/pdf") continue;
+      const format = detectFormat(file);
+      if (!format) continue;
       toast(`Importing ${file.name}…`, 60000);
       try {
-        const blob = file.slice(0, file.size, "application/pdf");
-        const pdf = await loadPdfFromBlob(blob);
-        const baseName = file.name.replace(/\.pdf$/i, "").replace(/[_-]+/g, " ").trim();
-        const meta = await extractTitleFromMetadata(pdf, baseName);
-        const coverBlob = await extractCoverBlob(pdf, 480).catch(() => null);
-        const id = "b_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 7);
-        const book = {
-          id,
-          title: meta.title,
-          author: meta.author,
-          fileName: file.name,
-          sizeBytes: file.size,
-          pageCount: pdf.numPages,
-          lastPage: 0,
-          lastReadAt: 0,
-          addedAt: Date.now(),
-          finishedAt: 0,
-          bookmarked: false,
-          coverBlob,
-          fileBlob: blob,
-        };
-        await idb.put("books", book);
-        added++;
+        const buf = await file.arrayBuffer();
+        if (format === "pdf") {
+          await waitFor(() => !!window.pdfjsLib);
+          const blob = new Blob([buf], { type: "application/pdf" });
+          const pdf = await loadPdfFromBlob(blob);
+          const baseName = file.name.replace(/\.pdf$/i, "").replace(/[_-]+/g, " ").trim();
+          const meta = await extractPdfMeta(pdf, baseName);
+          const coverBlob = await extractPdfCoverBlob(pdf, 480).catch(() => null);
+          const id = "b_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 7);
+          await idb.put("files", { id, blob });
+          await idb.put("books", {
+            id, format: "pdf",
+            title: meta.title, author: meta.author,
+            fileName: file.name, sizeBytes: file.size,
+            pageCount: pdf.numPages, lastPage: 0, lastReadAt: 0,
+            addedAt: Date.now(), finishedAt: 0, bookmarked: false,
+            coverBlob,
+          });
+          try { await pdf.destroy(); } catch {}
+          added++;
+        } else if (format === "epub") {
+          await waitFor(() => !!window.ePub);
+          const blob = new Blob([buf], { type: "application/epub+zip" });
+          const book = await openEpubFromBlob(blob);
+          const baseName = file.name.replace(/\.epub$/i, "").replace(/[_-]+/g, " ").trim();
+          const meta = getEpubMeta(book, baseName);
+          const coverBlob = await extractEpubCoverBlob(book).catch(() => null);
+          const id = "b_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 7);
+          await idb.put("files", { id, blob });
+          await idb.put("books", {
+            id, format: "epub",
+            title: meta.title, author: meta.author,
+            fileName: file.name, sizeBytes: file.size,
+            pageCount: 0, lastPage: 0, lastReadAt: 0,
+            addedAt: Date.now(), finishedAt: 0, bookmarked: false,
+            coverBlob, lastCfi: null, epubLocations: null,
+          });
+          try { book.destroy(); } catch {}
+          added++;
+        }
       } catch (e) {
         console.error("import failed", file.name, e);
         toast(`Could not import ${file.name}`, 3000);
@@ -719,31 +1296,150 @@
       if ((location.hash || "#/library") === "#/library") handleRoute();
       else navigate("#/library");
     } else {
-      toast("No PDFs imported.", 2200);
+      toast("No supported files imported.", 2200);
+    }
+  }
+
+  // ---------- Export / Restore ----------
+  function blobToB64(blob) {
+    if (!blob) return Promise.resolve(null);
+    return new Promise((res, rej) => {
+      const r = new FileReader();
+      r.onload = () => res({ b64: r.result.split(",")[1], type: blob.type || "application/octet-stream" });
+      r.onerror = rej;
+      r.readAsDataURL(blob);
+    });
+  }
+  function b64ToBlob(b64, type) {
+    const bin = atob(b64);
+    const arr = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+    return new Blob([arr], { type: type || "application/octet-stream" });
+  }
+  async function exportLibrary() {
+    toast("Preparing backup…", 60000);
+    const [books, files, sessions, prefs, highlights] = await Promise.all([
+      idb.all("books"), idb.all("files"), idb.all("sessions"), idb.all("prefs"), idb.all("highlights"),
+    ]);
+    // Convert blobs to base64
+    const booksOut = [];
+    for (const b of books) {
+      const cover = b.coverBlob ? await blobToB64(b.coverBlob) : null;
+      const copy = { ...b }; delete copy.coverBlob; delete copy.fileBlob;
+      booksOut.push({ ...copy, cover });
+    }
+    const filesOut = [];
+    for (const f of files) {
+      const b = await blobToB64(f.blob);
+      filesOut.push({ id: f.id, type: b ? b.type : "application/octet-stream", b64: b ? b.b64 : null });
+    }
+    const out = {
+      format: "cozy-reader-backup",
+      version: 1,
+      exportedAt: Date.now(),
+      books: booksOut, files: filesOut, sessions, prefs, highlights,
+    };
+    const json = JSON.stringify(out);
+    const blob = new Blob([json], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
+    a.href = url;
+    a.download = `cozy-reader-backup-${stamp}.cozy.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+    toast("Backup saved.", 2200);
+  }
+  async function restoreLibrary(file) {
+    if (!file) return;
+    if (!confirm("Restore from backup? This MERGES with your current library — duplicate IDs will be overwritten.")) return;
+    toast("Restoring…", 60000);
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+      if (data.format !== "cozy-reader-backup") { toast("Not a Cozy Reader backup."); return; }
+      for (const b of data.books || []) {
+        const cover = b.cover && b.cover.b64 ? b64ToBlob(b.cover.b64, b.cover.type) : null;
+        const copy = { ...b }; delete copy.cover;
+        copy.coverBlob = cover;
+        await idb.put("books", copy);
+      }
+      for (const f of data.files || []) {
+        if (!f.b64) continue;
+        const blob = b64ToBlob(f.b64, f.type);
+        await idb.put("files", { id: f.id, blob });
+      }
+      for (const s of data.sessions || []) {
+        const copy = { ...s }; delete copy.id; // let autoincrement assign fresh id
+        await idb.put("sessions", copy);
+      }
+      for (const p of data.prefs || []) await idb.put("prefs", p);
+      for (const h of data.highlights || []) await idb.put("highlights", h);
+      cachedPrefs = await loadPrefs();
+      applyTheme(cachedPrefs.theme);
+      toast("Restored.", 2200);
+      navigate("#/library");
+    } catch (e) {
+      console.error(e);
+      toast("Restore failed.", 2500);
     }
   }
 
   // ---------- Boot ----------
   async function boot() {
     cachedPrefs = await loadPrefs();
-    applyPrefsToCSS();
+    applyTheme(cachedPrefs.theme);
+    applyBrightness(cachedPrefs.brightness);
 
-    // Wire global controls
+    // Wire controls
     $("#fab").addEventListener("click", () => $("#pdfInput").click());
     $("#topImportBtn").addEventListener("click", () => $("#pdfInput").click());
     $("#pdfInput").addEventListener("change", (e) => {
       const files = Array.from(e.target.files || []);
-      e.target.value = ""; // reset
+      e.target.value = "";
       handleFiles(files);
     });
-
-    // Route buttons
-    document.addEventListener("click", (e) => {
-      const t = e.target.closest("[data-route]");
-      if (!t) return;
-      e.preventDefault();
-      navigate(t.dataset.route);
+    $("#restoreInput").addEventListener("change", (e) => {
+      const f = (e.target.files || [])[0];
+      e.target.value = "";
+      if (f) restoreLibrary(f);
     });
+
+    // Theme quick toggle in header (cycles light → sepia → dark)
+    $("#themeQuickToggle").addEventListener("click", () => {
+      const order = ["light", "sepia", "dark"];
+      const idx = order.indexOf(cachedPrefs.theme);
+      const next = order[(idx + 1) % order.length];
+      cachedPrefs.theme = next;
+      applyTheme(next);
+      setPref("theme", next);
+      toast("Theme: " + next, 1200);
+    });
+
+    // Options sheet — bind theme/font picks here so they apply on the fly
+    document.addEventListener("click", (e) => {
+      const tp = e.target.closest("[data-theme-pick]");
+      if (tp) {
+        cachedPrefs.theme = tp.dataset.themePick;
+        applyTheme(cachedPrefs.theme);
+        setPref("theme", cachedPrefs.theme);
+        return;
+      }
+      const fp = e.target.closest("[data-font-pick]");
+      if (fp) {
+        cachedPrefs.fontFamily = fp.dataset.fontPick;
+        applyEpubReaderStyles();
+        setPref("fontFamily", cachedPrefs.fontFamily);
+        $$("[data-font-pick]").forEach((b) => b.classList.toggle("is-active", b.dataset.fontPick === cachedPrefs.fontFamily));
+        return;
+      }
+      const rt = e.target.closest("[data-route]");
+      if (rt) { e.preventDefault(); navigate(rt.dataset.route); return; }
+    });
+    $("#optionsClose").addEventListener("click", closeOptionsSheet);
+    $("#optionsBackdrop").addEventListener("click", closeOptionsSheet);
 
     // Drag & drop
     window.addEventListener("dragover", (e) => { e.preventDefault(); });

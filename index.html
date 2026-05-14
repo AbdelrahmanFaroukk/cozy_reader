@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="en" class="light">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <meta name="theme-color" content="#fbf9f4" />
+  <meta name="theme-color" content="#fbf9f4" id="themeColorMeta" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
@@ -16,7 +16,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,200..900;1,7..72,200..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,200..900;1,7..72,200..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Lora:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
 
   <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
@@ -25,27 +25,50 @@
       theme: {
         extend: {
           colors: {
-            "tertiary": "#605b58", "on-secondary": "#ffffff", "surface": "#fbf9f4",
-            "surface-variant": "#e4e2dd", "secondary": "#695c51", "background": "#fbf9f4",
-            "on-error": "#ffffff", "error-container": "#ffdad6", "surface-bright": "#fbf9f4",
-            "primary-container": "#b15f00", "on-primary": "#ffffff",
-            "outline-variant": "#dbc2b0", "surface-container-low": "#f5f3ee",
-            "inverse-primary": "#ffb77d", "surface-dim": "#dbdad5",
-            "error": "#ba1a1a", "surface-container-lowest": "#ffffff",
-            "surface-container-high": "#eae8e3", "primary-fixed": "#ffdcc3",
-            "on-surface-variant": "#554336", "surface-container-highest": "#e4e2dd",
-            "secondary-container": "#efdcce", "primary": "#8d4b00",
-            "on-background": "#1b1c19", "inverse-on-surface": "#f2f1ec",
-            "on-primary-fixed": "#2f1500", "on-secondary-container": "#6e6055",
-            "inverse-surface": "#30312e", "secondary-fixed-dim": "#d5c3b6",
-            "secondary-fixed": "#f2dfd1", "outline": "#887364",
-            "on-surface": "#1b1c19", "on-tertiary": "#ffffff",
-            "surface-tint": "#904d00", "on-primary-container": "#fffbff",
-            "surface-container": "#f0eee9", "on-secondary-fixed": "#231a11",
-            "on-primary-fixed-variant": "#6e3900", "primary-fixed-dim": "#ffb77d",
-            "tertiary-container": "#797470", "tertiary-fixed": "#e8e1dd",
-            "on-tertiary-fixed": "#1e1b19", "on-tertiary-fixed-variant": "#4a4643",
-            "on-secondary-fixed-variant": "#51443a", "on-error-container": "#93000a",
+            "surface": "var(--surface)",
+            "surface-variant": "var(--surface-variant)",
+            "surface-bright": "var(--surface-bright)",
+            "surface-dim": "var(--surface-dim)",
+            "surface-container-lowest": "var(--surface-container-lowest)",
+            "surface-container-low": "var(--surface-container-low)",
+            "surface-container": "var(--surface-container)",
+            "surface-container-high": "var(--surface-container-high)",
+            "surface-container-highest": "var(--surface-container-highest)",
+            "background": "var(--surface)",
+            "on-background": "var(--on-surface)",
+            "on-surface": "var(--on-surface)",
+            "on-surface-variant": "var(--on-surface-variant)",
+            "primary": "var(--primary)",
+            "on-primary": "var(--on-primary)",
+            "primary-container": "var(--primary-container)",
+            "on-primary-container": "var(--on-primary-container)",
+            "primary-fixed": "var(--primary-fixed)",
+            "primary-fixed-dim": "var(--primary-fixed-dim)",
+            "on-primary-fixed": "var(--on-primary-fixed)",
+            "on-primary-fixed-variant": "var(--on-primary-fixed-variant)",
+            "secondary": "var(--secondary)",
+            "on-secondary": "var(--on-secondary)",
+            "secondary-container": "var(--secondary-container)",
+            "on-secondary-container": "var(--on-secondary-container)",
+            "secondary-fixed": "var(--secondary-fixed)",
+            "secondary-fixed-dim": "var(--secondary-fixed-dim)",
+            "on-secondary-fixed": "var(--on-secondary-fixed)",
+            "on-secondary-fixed-variant": "var(--on-secondary-fixed-variant)",
+            "tertiary": "var(--tertiary)",
+            "on-tertiary": "var(--on-tertiary)",
+            "tertiary-container": "var(--tertiary-container)",
+            "tertiary-fixed": "var(--tertiary-fixed)",
+            "on-tertiary-fixed": "var(--on-tertiary-fixed)",
+            "outline": "var(--outline)",
+            "outline-variant": "var(--outline-variant)",
+            "inverse-surface": "var(--inverse-surface)",
+            "inverse-on-surface": "var(--inverse-on-surface)",
+            "inverse-primary": "var(--inverse-primary)",
+            "surface-tint": "var(--surface-tint)",
+            "error": "var(--error)",
+            "on-error": "var(--on-error)",
+            "error-container": "var(--error-container)",
+            "on-error-container": "var(--on-error-container)",
           },
           fontFamily: {
             "serif-display": ["Literata", "serif"],
@@ -60,8 +83,13 @@
 </head>
 <body class="bg-background text-on-background min-h-[100dvh] flex flex-col antialiased font-serif-body">
 
-  <!-- Top App Bar (mobile + desktop) -->
-  <header class="sticky top-0 z-40 bg-surface/85 backdrop-blur-md flex items-center justify-between px-5 md:px-16 h-14 max-w-[1120px] mx-auto w-full">
+  <!-- Update available banner -->
+  <div id="updateBanner" class="hidden fixed top-0 left-0 right-0 z-[60] bg-primary text-on-primary px-4 py-2 text-center text-sm font-sans-ui shadow-lg cursor-pointer">
+    <span>Update available — tap to refresh</span>
+  </div>
+
+  <!-- Top App Bar -->
+  <header id="appHeader" class="sticky top-0 z-40 bg-surface/85 backdrop-blur-md flex items-center justify-between px-5 md:px-16 h-14 max-w-[1120px] mx-auto w-full">
     <button data-route="#/library" class="route-btn font-serif-display text-xl font-bold text-primary tracking-tight">Cozy Reader</button>
     <nav class="hidden md:flex gap-1 items-center text-sm font-sans-ui">
       <button data-route="#/library" class="route-btn px-3 py-2 rounded-lg text-on-surface-variant">Library</button>
@@ -69,6 +97,9 @@
       <button data-route="#/settings" class="route-btn px-3 py-2 rounded-lg text-on-surface-variant">Settings</button>
     </nav>
     <div class="flex items-center gap-1">
+      <button id="themeQuickToggle" class="p-2 rounded-full text-on-surface-variant hover:bg-surface-container-low active:scale-95 transition" aria-label="Toggle theme">
+        <span class="material-symbols-outlined" id="themeQuickIcon">dark_mode</span>
+      </button>
       <button id="topImportBtn" class="p-2 rounded-full text-primary hover:bg-surface-container-low active:scale-95 transition" aria-label="Import a book">
         <span class="material-symbols-outlined">upload_file</span>
       </button>
@@ -100,11 +131,84 @@
     <span class="material-symbols-outlined text-3xl">add</span>
   </button>
 
-  <!-- File input (hidden) -->
-  <input id="pdfInput" type="file" accept="application/pdf,.pdf" multiple class="hidden" />
+  <!-- File input (hidden) — PDF + EPUB -->
+  <input id="pdfInput" type="file" accept="application/pdf,.pdf,application/epub+zip,.epub" multiple class="hidden" />
+  <!-- Hidden file input for backup restore -->
+  <input id="restoreInput" type="file" accept=".cozy,.json,application/json" class="hidden" />
 
-  <!-- Import progress toast -->
+  <!-- Toast -->
   <div id="toast" class="fixed bottom-24 md:bottom-8 left-1/2 -translate-x-1/2 z-50 hidden bg-inverse-surface text-inverse-on-surface px-4 py-2 rounded-full text-sm font-sans-ui shadow-lg"></div>
+
+  <!-- Reader Options bottom sheet -->
+  <div id="optionsBackdrop" class="hidden fixed inset-0 z-[55] bg-black/40 backdrop-blur-sm"></div>
+  <div id="optionsSheet" class="hidden fixed bottom-0 left-0 right-0 z-[56] bg-surface-container-low text-on-surface rounded-t-2xl border-t border-outline-variant shadow-[0_-12px_32px_rgba(0,0,0,0.18)] max-h-[85dvh] overflow-y-auto">
+    <div class="sticky top-0 bg-surface-container-low/95 backdrop-blur-md px-5 pt-3 pb-2 flex items-center justify-between">
+      <div class="flex-1">
+        <div class="w-10 h-1 rounded-full bg-outline-variant mx-auto mb-2"></div>
+        <h3 class="font-serif-display text-lg">Reading options</h3>
+      </div>
+      <button id="optionsClose" class="p-2 rounded-full hover:bg-surface-container-high" aria-label="Close">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <div class="px-5 pb-8 space-y-6">
+
+      <div class="space-y-2">
+        <h4 class="text-xs uppercase tracking-widest text-on-surface-variant font-sans-ui">Theme</h4>
+        <div class="grid grid-cols-3 gap-2">
+          <button data-theme-pick="light" class="theme-pick" data-swatch="light">
+            <span class="swatch swatch-light"></span><span>Light</span>
+          </button>
+          <button data-theme-pick="sepia" class="theme-pick" data-swatch="sepia">
+            <span class="swatch swatch-sepia"></span><span>Sepia</span>
+          </button>
+          <button data-theme-pick="dark" class="theme-pick" data-swatch="dark">
+            <span class="swatch swatch-dark"></span><span>Dark</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="setting-row">
+        <label class="setting-label">Brightness</label>
+        <input id="prefBrightness" type="range" min="40" max="100" step="2" class="slider-scrub w-full" />
+        <span data-val="prefBrightness" class="setting-val">100%</span>
+      </div>
+
+      <div data-epub-only class="space-y-4">
+        <div class="space-y-2">
+          <h4 class="text-xs uppercase tracking-widest text-on-surface-variant font-sans-ui">Font</h4>
+          <div class="grid grid-cols-2 gap-2" id="fontFamilyGrid">
+            <button data-font-pick="Literata" class="font-pick" style="font-family: Literata, serif;">Literata</button>
+            <button data-font-pick="Lora" class="font-pick" style="font-family: Lora, serif;">Lora</button>
+            <button data-font-pick="Georgia" class="font-pick" style="font-family: Georgia, serif;">Georgia</button>
+            <button data-font-pick="-apple-system" class="font-pick" style="font-family: -apple-system, system-ui, sans-serif;">System</button>
+          </div>
+        </div>
+
+        <div class="setting-row">
+          <label class="setting-label">Font size</label>
+          <input id="prefFontSize" type="range" min="14" max="32" step="1" class="slider-scrub w-full" />
+          <span data-val="prefFontSize" class="setting-val">18px</span>
+        </div>
+
+        <div class="setting-row">
+          <label class="setting-label">Line height</label>
+          <input id="prefLineHeight" type="range" min="12" max="22" step="1" class="slider-scrub w-full" />
+          <span data-val="prefLineHeight" class="setting-val">1.6</span>
+        </div>
+
+        <div class="setting-row">
+          <label class="setting-label">Margin</label>
+          <input id="prefMargin" type="range" min="0" max="64" step="2" class="slider-scrub w-full" />
+          <span data-val="prefMargin" class="setting-val">24px</span>
+        </div>
+      </div>
+
+      <div data-pdf-only class="text-xs text-on-surface-variant px-1">
+        Font controls don't apply to PDFs — use the zoom controls in the reader. Long-press text to select/copy with iOS native menu.
+      </div>
+    </div>
+  </div>
 
   <!-- Templates -->
   <template id="tpl-library">
@@ -114,17 +218,15 @@
         <p class="text-on-surface-variant" data-subgreet>Your library is waiting.</p>
       </div>
 
-      <!-- Empty state -->
       <div data-empty class="hidden border-2 border-dashed border-outline-variant rounded-xl py-14 px-6 text-center bg-surface-container-lowest">
         <div class="w-16 h-16 rounded-full bg-primary-container mx-auto flex items-center justify-center text-on-primary-container mb-4">
           <span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">menu_book</span>
         </div>
         <h2 class="font-serif-display text-2xl mb-2">Your shelf is empty</h2>
-        <p class="text-on-surface-variant mb-6 max-w-md mx-auto">Import a PDF and we'll use its first page as the book's cover automatically.</p>
-        <button data-act="empty-import" class="bg-primary text-on-primary px-6 py-3 rounded-full text-sm font-sans-ui font-medium active:scale-95 transition">Import a PDF</button>
+        <p class="text-on-surface-variant mb-6 max-w-md mx-auto">Import a PDF or EPUB. We'll use the first page (or the book's embedded cover) as the cover automatically.</p>
+        <button data-act="empty-import" class="bg-primary text-on-primary px-6 py-3 rounded-full text-sm font-sans-ui font-medium active:scale-95 transition">Import a book</button>
       </div>
 
-      <!-- Reading Now -->
       <section data-section="reading-now" class="space-y-4 hidden">
         <div class="flex justify-between items-end border-b border-outline-variant pb-2">
           <h2 class="text-lg font-bold text-on-surface">Reading Now</h2>
@@ -140,7 +242,6 @@
         </div>
       </section>
 
-      <!-- All Books -->
       <section data-section="all-books" class="space-y-4 hidden">
         <div class="flex justify-between items-end border-b border-outline-variant pb-2">
           <h2 class="text-lg font-bold text-on-surface">All Books</h2>
@@ -156,7 +257,6 @@
         </div>
       </section>
 
-      <!-- Finished -->
       <section data-section="finished" class="space-y-4 hidden">
         <div class="flex justify-between items-end border-b border-outline-variant pb-2">
           <h2 class="text-lg font-bold text-on-surface">Finished</h2>
@@ -181,7 +281,6 @@
         <p class="text-on-surface-variant">Every metric here comes from your actual reading sessions.</p>
       </div>
 
-      <!-- Top metrics -->
       <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
         <div class="metric-card"><span class="metric-label">Books</span><span class="metric-value" data-metric="books">0</span><span class="metric-sub" data-metric-sub="books"></span></div>
         <div class="metric-card"><span class="metric-label">In progress</span><span class="metric-value" data-metric="inprogress">0</span><span class="metric-sub" data-metric-sub="inprogress"></span></div>
@@ -193,7 +292,6 @@
         <div class="metric-card"><span class="metric-label">Pages total</span><span class="metric-value" data-metric="pagesTotal">0</span><span class="metric-sub" data-metric-sub="pagesTotal"></span></div>
       </div>
 
-      <!-- Weekly chart -->
       <section class="space-y-3">
         <div class="flex justify-between items-end border-b border-outline-variant pb-2">
           <h2 class="text-lg font-bold text-on-surface">Last 7 days</h2>
@@ -202,7 +300,6 @@
         <div id="weekChart" class="flex items-end gap-2 h-40 px-1"></div>
       </section>
 
-      <!-- Per-book progress with slider -->
       <section class="space-y-3">
         <div class="flex justify-between items-end border-b border-outline-variant pb-2">
           <h2 class="text-lg font-bold text-on-surface">Books in progress</h2>
@@ -228,13 +325,32 @@
       </div>
 
       <div class="space-y-4">
+        <h2 class="text-lg font-bold border-b border-outline-variant pb-2">Theme</h2>
+        <div class="grid grid-cols-3 gap-2 max-w-md">
+          <button data-theme-pick="light" class="theme-pick" data-swatch="light"><span class="swatch swatch-light"></span><span>Light</span></button>
+          <button data-theme-pick="sepia" class="theme-pick" data-swatch="sepia"><span class="swatch swatch-sepia"></span><span>Sepia</span></button>
+          <button data-theme-pick="dark" class="theme-pick" data-swatch="dark"><span class="swatch swatch-dark"></span><span>Dark</span></button>
+        </div>
+      </div>
+
+      <div class="space-y-4">
         <h2 class="text-lg font-bold border-b border-outline-variant pb-2">Reader</h2>
         <div class="setting-row">
           <label class="setting-label">Page width</label>
           <input id="prefPageWidth" type="range" min="380" max="1100" step="20" class="slider-scrub w-full max-w-xs" />
           <span data-val="prefPageWidth" class="setting-val">720px</span>
         </div>
-        <p class="text-xs text-on-surface-variant">Wider page = larger zoom. The slider above each book list lets you scrub through it instantly.</p>
+        <p class="text-xs text-on-surface-variant">Tap the slider icon inside the reader for theme, brightness, and EPUB font controls.</p>
+      </div>
+
+      <div class="space-y-4">
+        <h2 class="text-lg font-bold border-b border-outline-variant pb-2">Backup &amp; updates</h2>
+        <p class="text-on-surface-variant text-sm">Your library lives in this device's IndexedDB. Export to a single file before deleting/re-installing the app on iOS — that's the safest way to keep your books, sessions, and highlights.</p>
+        <div class="flex flex-wrap gap-3">
+          <button id="exportBtn" class="px-4 py-2 rounded-full bg-primary text-on-primary text-sm font-sans-ui">Export library</button>
+          <button id="importBtn" class="px-4 py-2 rounded-full border border-outline-variant text-sm font-sans-ui">Restore from backup</button>
+          <button id="checkUpdateBtn" class="px-4 py-2 rounded-full border border-outline-variant text-sm font-sans-ui">Check for updates</button>
+        </div>
       </div>
 
       <div class="space-y-4">
@@ -243,10 +359,10 @@
       </div>
 
       <div class="space-y-4">
-        <h2 class="text-lg font-bold border-b border-outline-variant pb-2">Data</h2>
+        <h2 class="text-lg font-bold border-b border-outline-variant pb-2">Danger zone</h2>
         <div class="flex flex-wrap gap-3">
           <button id="resetSessions" class="px-4 py-2 rounded-full border border-outline-variant text-sm font-sans-ui">Reset reading metrics</button>
-          <button id="wipeAll" class="px-4 py-2 rounded-full bg-error text-on-error text-sm font-sans-ui">Delete all books & data</button>
+          <button id="wipeAll" class="px-4 py-2 rounded-full bg-error text-on-error text-sm font-sans-ui">Delete all books &amp; data</button>
         </div>
         <p class="text-xs text-on-surface-variant" id="storageInfo"></p>
       </div>
@@ -254,32 +370,69 @@
   </template>
 
   <template id="tpl-reader">
-    <section class="space-y-4">
-      <header class="flex items-center justify-between gap-2">
+    <section class="space-y-3" id="readerSection">
+      <header data-reader-chrome class="flex items-center justify-between gap-1">
         <button data-route="#/library" class="route-btn p-2 rounded-full hover:bg-surface-container-low" aria-label="Back to library">
           <span class="material-symbols-outlined">arrow_back</span>
         </button>
-        <div class="flex-1 min-w-0 text-center">
+        <div class="flex-1 min-w-0 text-center px-1">
           <div class="text-xs uppercase tracking-widest text-on-surface-variant font-sans-ui truncate" data-reader-title>—</div>
-          <div class="text-xs text-on-surface-variant font-sans-ui" data-reader-meta>—</div>
+          <div class="text-[11px] text-on-surface-variant font-sans-ui truncate" data-reader-meta>—</div>
         </div>
+        <button data-act="options" class="p-2 rounded-full hover:bg-surface-container-low" aria-label="Reading options">
+          <span class="material-symbols-outlined">tune</span>
+        </button>
+        <button data-act="fullscreen" class="p-2 rounded-full hover:bg-surface-container-low" aria-label="Toggle fullscreen">
+          <span class="material-symbols-outlined" data-fs-icon>fullscreen</span>
+        </button>
         <button data-act="bookmark" class="p-2 rounded-full hover:bg-surface-container-low" aria-label="Bookmark">
           <span class="material-symbols-outlined" data-bookmark-icon>bookmark_border</span>
         </button>
       </header>
 
-      <div id="pdfStage" class="relative w-full flex justify-center items-start min-h-[60dvh]">
-        <canvas id="pdfCanvas" class="max-w-full h-auto rounded shadow-[2px_4px_18px_rgba(105,92,81,0.18)] bg-surface-container-lowest"></canvas>
+      <div id="readerFrame" class="relative">
+        <!-- PDF stage -->
+        <div id="pdfStage" class="hidden">
+          <div id="pdfPan">
+            <canvas id="pdfCanvas"></canvas>
+            <div id="pdfTextLayer" class="textLayer"></div>
+          </div>
+        </div>
+        <!-- EPUB stage -->
+        <div id="epubStage" class="hidden"></div>
+
         <button data-act="prev" class="reader-edge left-0" aria-label="Previous page">
           <span class="material-symbols-outlined">chevron_left</span>
         </button>
         <button data-act="next" class="reader-edge right-0" aria-label="Next page">
           <span class="material-symbols-outlined">chevron_right</span>
         </button>
+        <button data-act="exit-fullscreen" id="exitFullscreenBtn" class="hidden absolute top-3 right-3 z-40 bg-inverse-surface/85 text-inverse-on-surface w-10 h-10 rounded-full flex items-center justify-center backdrop-blur-md shadow-lg" aria-label="Exit fullscreen">
+          <span class="material-symbols-outlined">fullscreen_exit</span>
+        </button>
+
+        <!-- Floating selection action (shown when user selects EPUB text) -->
+        <div id="selectionAction" class="hidden absolute z-50 bg-inverse-surface text-inverse-on-surface rounded-full shadow-lg px-1 py-1 flex items-center gap-1">
+          <button data-act="highlight" class="px-3 py-1.5 text-xs font-sans-ui rounded-full hover:bg-white/10">Highlight</button>
+          <button data-act="unhighlight" class="px-3 py-1.5 text-xs font-sans-ui rounded-full hover:bg-white/10">Remove</button>
+          <button data-act="cancel-sel" class="px-2 py-1.5 hover:bg-white/10 rounded-full" aria-label="Cancel">
+            <span class="material-symbols-outlined text-base">close</span>
+          </button>
+        </div>
       </div>
 
-      <!-- Page slider — jump to any page -->
-      <div class="sticky bottom-2 z-30 mx-auto max-w-[720px] w-full px-2">
+      <div id="readerControls" class="sticky bottom-2 z-30 mx-auto max-w-[720px] w-full px-2 space-y-2">
+        <!-- PDF-only zoom pill -->
+        <div data-pdf-only class="flex items-center gap-1 bg-surface-container-high/95 backdrop-blur-md border border-surface-variant rounded-full px-2 py-1.5 shadow-[0_8px_24px_rgba(105,92,81,0.12)]">
+          <button data-act="zoom-out" class="zoom-btn" aria-label="Zoom out"><span class="material-symbols-outlined">remove</span></button>
+          <button data-act="zoom-reset" class="text-xs font-sans-ui min-w-[3.5rem] text-center px-2 py-1 rounded-full hover:bg-surface-container-highest" data-zoom-label>100%</button>
+          <button data-act="zoom-in" class="zoom-btn" aria-label="Zoom in"><span class="material-symbols-outlined">add</span></button>
+          <span class="w-px h-5 bg-outline-variant/60 mx-1"></span>
+          <button data-act="fit-width" class="text-[11px] font-sans-ui px-2 py-1 rounded-full hover:bg-surface-container-highest" aria-label="Fit to width">Fit</button>
+          <span class="flex-1"></span>
+          <span class="text-[11px] font-sans-ui text-on-surface-variant px-2">Pinch · swipe · drag</span>
+        </div>
+        <!-- Page slider (works for both formats) -->
         <div class="flex items-center gap-3 bg-surface-container-high/95 backdrop-blur-md border border-surface-variant rounded-full px-3 py-2 shadow-[0_8px_24px_rgba(105,92,81,0.12)]">
           <span class="text-xs font-sans-ui text-on-surface-variant min-w-[3rem] text-center" data-page-cur>1</span>
           <input id="pageSlider" type="range" min="1" max="1" value="1" class="slider-scrub flex-1" aria-label="Jump to page" />
@@ -289,16 +442,54 @@
     </section>
   </template>
 
+  <!-- PDF.js (ESM module) -->
   <script type="module">
     import * as pdfjsLib from "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.5.136/build/pdf.min.mjs";
     pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.5.136/build/pdf.worker.min.mjs";
     window.pdfjsLib = pdfjsLib;
     window.dispatchEvent(new Event("pdfjs-ready"));
   </script>
+  <!-- epub.js (UMD, depends on JSZip) -->
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/epubjs@0.3.93/dist/epub.min.js"></script>
+
   <script src="./app.js" defer></script>
   <script>
+    // SW registration with update detection
     if ("serviceWorker" in navigator) {
-      window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js").catch(() => {}));
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./sw.js").then((reg) => {
+          if (reg.waiting) showUpdateBanner(reg);
+          reg.addEventListener("updatefound", () => {
+            const sw = reg.installing;
+            if (!sw) return;
+            sw.addEventListener("statechange", () => {
+              if (sw.state === "installed" && navigator.serviceWorker.controller) showUpdateBanner(reg);
+            });
+          });
+        }).catch(() => {});
+        navigator.serviceWorker.addEventListener("controllerchange", () => {
+          if (window.__cozyReloading) return;
+          window.__cozyReloading = true;
+          window.location.reload();
+        });
+      });
+      function showUpdateBanner(reg) {
+        const b = document.getElementById("updateBanner");
+        if (!b) return;
+        b.classList.remove("hidden");
+        b.onclick = () => {
+          if (reg.waiting) reg.waiting.postMessage("skipWaiting");
+          else window.location.reload();
+        };
+      }
+      window.__cozyCheckUpdate = async () => {
+        const reg = await navigator.serviceWorker.getRegistration();
+        if (!reg) { window.location.reload(); return; }
+        await reg.update();
+        if (reg.waiting) reg.waiting.postMessage("skipWaiting");
+        else { window.__cozyReloading = true; window.location.reload(); }
+      };
     }
   </script>
 </body>
